@@ -5,7 +5,23 @@ const EditUser = React.lazy(() => import('./views/users/EditUser'))
 const Categories = React.lazy(() => import('./views/category/Categories.js'))
 const AddCategory = React.lazy(() => import('./views/category/AddCategory.js'))
 const EditCategory = React.lazy(() => import('./views/category/EditCategory.js'))
+const Vendors = React.lazy(() => import('./views/vendor/Vendors.js'))
+const AddVendors = React.lazy(() => import('./views/vendor/AddVendors.js'))
+const EditVendor = React.lazy(() => import('./views/vendor/EditVendor.js'))
+const Bills = React.lazy(() => import('./views/bill/Bills.js'))
+const EditBill = React.lazy(() => import('./views/bill/EditBill.js'))
+const BillTypes = React.lazy(() => import('./views/billType/BillTypes.js'))
+const AddBillTypes = React.lazy(() => import('./views/billType/AddBillTypes.js'))
+const EditBillTypes = React.lazy(() => import('./views/billType/EditBillTypes.js'))
+const UserWallet = React.lazy(() => import('./views/wallet/Wallet.js'))
+const ViewUserWallet = React.lazy(() => import('./views/wallet/ViewWallet.js'))
+
+
+
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
+
+
+// Others
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
@@ -58,12 +74,26 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
+  { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/user', name: 'User', element: User },
   { path: '/edit-user', name: 'EditUser', element: EditUser },
   { path: '/category', name: 'Categories', element: Categories },
   { path: '/add-category', name: 'AddCategory', element: AddCategory },
   { path: '/edit-category', name: 'EditCategory', element: EditCategory },
-  { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/vendors', name: 'Vendors', element: Vendors },
+  { path: '/add-vendor', name: 'AddVendor', element: AddVendors },
+  { path: '/edit-vendor', name: 'EditVendor', element: EditVendor },
+  { path: '/bills', name: 'Bills', element: Bills },
+  { path: '/edit-bill', name: 'EditBill', element: EditBill },
+  { path: '/bill-types', name: 'BillTypes', element: BillTypes },
+  { path: '/add-bill-type', name: 'AddBillTypes', element: AddBillTypes },
+  { path: '/edit-bill-type', name: 'EditBillTypes', element: EditBillTypes },
+  { path: '/user-wallet', name: 'UserWallet', element: UserWallet },
+  { path: '/view-wallet', name: 'ViewUserWallet', element: ViewUserWallet },
+
+
+
+  // Others
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
