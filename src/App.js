@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-
+import { HashRouter, Route, Routes, Navigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { loginSuccess } from './redux/actions/authActions'
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
 
@@ -17,20 +17,29 @@ const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
   const storedTheme = useSelector((state) => state.theme)
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
+  const dispatch = useDispatch()
 
   useEffect(() => {
+    // Check if there is a token in localStorage
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      // Optionally validate the token with the backend here
+      const user = { username: 'ExistingUser', accessToken: token } // Replace with real user data parsing logic if needed
+      console.log('dispatching')
+      dispatch(loginSuccess(user))
+    }
+
     const urlParams = new URLSearchParams(window.location.href.split('?')[1])
     const theme = urlParams.get('theme') && urlParams.get('theme').match(/^[A-Za-z0-9\s]+/)[0]
     if (theme) {
       setColorMode(theme)
     }
 
-    if (isColorModeSet()) {
-      return
+    if (!isColorModeSet()) {
+      setColorMode(storedTheme)
     }
-
-    setColorMode(storedTheme)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, isColorModeSet, setColorMode, storedTheme])
 
   return (
     <HashRouter>
@@ -46,7 +55,13 @@ const App = () => {
           <Route exact path="/register" name="Register Page" element={<Register />} />
           <Route exact path="/404" name="Page 404" element={<Page404 />} />
           <Route exact path="/500" name="Page 500" element={<Page500 />} />
-          <Route path="*" name="Home" element={<DefaultLayout />} />
+
+          {/* Protected Route */}
+          <Route
+            path="*"
+            name="Home"
+            element={isAuthenticated ? <DefaultLayout /> : <Navigate to="/login" />}
+          />
         </Routes>
       </Suspense>
     </HashRouter>
