@@ -45,7 +45,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(`https://onebill.onrender.com/api/v1/auth/login`, {
-        username,
+        email: username,
         password,
       })
 
