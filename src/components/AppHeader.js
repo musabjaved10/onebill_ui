@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+
+import React, { useEffect, useState, useRef } from "react";
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -29,9 +30,24 @@ import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
 
 const AppHeader = () => {
+  // navigate("/#/login");
+
 
   // Need to apply login condition
-  const isLoggedIn = false;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Local storage se token check karain
+    const token = localStorage.getItem("authToken");
+    console.log(token)
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+  // const isLoggedIn = false;
 
 
   const headerRef = useRef()
@@ -45,7 +61,14 @@ const AppHeader = () => {
       headerRef.current &&
         headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0)
     })
-  }, [])
+  }, []);
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    setIsLoggedIn(false);
+    window.location.reload();
+  };
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
@@ -88,7 +111,17 @@ const AppHeader = () => {
         </CHeaderNav>
         <CHeaderNav>
           {isLoggedIn ? (
-            <AppHeaderDropdown />
+            // <AppHeaderDropdown />
+            <>
+              <AppHeaderDropdown />
+              <li className="nav-item py-1">
+                <CNavItem>
+                  <CNavLink href="#" onClick={handleLogout}>
+                    Logout
+                  </CNavLink>
+                </CNavItem>
+              </li>
+            </>
           ) : (
             <li className="nav-item py-1">
               <CNavItem>
@@ -96,11 +129,6 @@ const AppHeader = () => {
               </CNavItem>
             </li>
           )}
-
-          {/* <li className="nav-item py-1">
-            <div className="vr h-100 mx-2 text-body text-opacity-75"></div>
-          </li>
-          <AppHeaderDropdown /> */}
         </CHeaderNav>
       </CContainer>
       <CContainer className="px-4" fluid>
