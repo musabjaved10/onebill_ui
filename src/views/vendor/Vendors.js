@@ -1,10 +1,46 @@
 // UserTable.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell } from '@coreui/react';
 
+import SpinnerOverlay from '../../components/SpinnerOverlay';
+import Pagination from '../../components/Pagination';
+import api from '../../api/apiWrapper';
+
 const Vendors = () => {
+
+    const [vendors, setVendors] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [pagination, setPagination] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+
+
+    const fetchVendors = async (page = 1) => {
+        try {
+            setLoading(true); // Show spinner
+            const response = await api.get(`/bills/vendors?page=${page}`);
+            console.log('data is', response.data);
+
+            setVendors(response.data.data.vendors); // Set users
+            setPagination(response.data.data.pagination); // Set pagination info
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoading(false); // Hide spinner
+        }
+    };
+
+    useEffect(() => {
+        fetchVendors(currentPage); // Fetch users for the current page
+    }, [currentPage]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page); // Update current page state
+    };
+
     return (
         <div>
+            <SpinnerOverlay isLoading={loading} />
+
             <div className="d-flex justify-content-end mb-3">
                 <a href="/#/add-vendor" className="btn btn-primary">Add Vendor</a>
             </div>
@@ -18,36 +54,32 @@ const Vendors = () => {
                     </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                    <CTableRow>
-                        <CTableHeaderCell scope="row">1</CTableHeaderCell>
-                        <CTableDataCell>Vendor 1</CTableDataCell>
-                        <CTableDataCell>K-Electric</CTableDataCell>
-                        <CTableDataCell>
-                            {/* <button className="btn btn-primary btn-sm me-2">Edit</button> */}
-                            <a href="/#/edit-vendor" className="btn btn-primary btn-sm me-2">Edit</a>
-                            <button className="btn btn-danger btn-sm">Delete</button>
-                        </CTableDataCell>
-                    </CTableRow>
-                    <CTableRow>
-                        <CTableHeaderCell scope="row">2</CTableHeaderCell>
-                        <CTableDataCell>Vendor 2</CTableDataCell>
-                        <CTableDataCell>Wapda</CTableDataCell>
-                        <CTableDataCell>
-                            <a href="/#/edit-vendor" className="btn btn-primary btn-sm me-2">Edit</a>
-                            <button className="btn btn-danger btn-sm">Delete</button>
-                        </CTableDataCell>
-                    </CTableRow>
-                    <CTableRow>
-                        <CTableHeaderCell scope="row">3</CTableHeaderCell>
-                        <CTableDataCell>Vendor 3</CTableDataCell>
-                        <CTableDataCell>Water</CTableDataCell>
-                        <CTableDataCell>
-                            <a href="/#/edit-vendor" className="btn btn-primary btn-sm me-2">Edit</a>
-                            <button className="btn btn-danger btn-sm">Delete</button>
-                        </CTableDataCell>
-                    </CTableRow>
+
+                    {vendors.map((vendor, index) => (
+                        <CTableRow key={vendor._id}>
+                            <CTableHeaderCell scope="row">
+                                {pagination.limit * (currentPage - 1) + index + 1}
+                            </CTableHeaderCell>
+                            <CTableDataCell>{vendor.provider_name ?? ''}</CTableDataCell>
+                            <CTableDataCell>{vendor.bill_category.name ?? ''}</CTableDataCell>
+                            <CTableDataCell>
+                            <a href={`/#/edit-vendor/${vendor._id}`} className="btn btn-primary btn-sm me-2">
+                                    Edit
+                                </a>
+                                <button className="btn btn-danger btn-sm">Delete</button>
+                            </CTableDataCell>
+                        </CTableRow>
+
+                    ))}
+
                 </CTableBody>
             </CTable>
+            {/* Pagination Component */}
+            <Pagination
+                totalPages={pagination.totalPages || 1}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+            />
         </div>
     );
 };
