@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { CCard, CCardHeader, CCardBody, CCardTitle, CCardText, CButton, CForm, CFormLabel, CFormInput, CFormSelect } from '@coreui/react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -11,59 +10,76 @@ const EditVendor = () => {
 
     const [vendorData, setVendorData] = useState({
         provider_name: '',
-        bill_category: ''
+        bill_id: ''
     });
     const [categories, setCategories] = useState([]);
-
     const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
 
-    const fetchCategories = async (page = 1) => {
+    const fetchCategories = async () => {
         try {
             setLoading(true); // Show spinner
             const response = await api.get(`/bills/categories`);
-            console.log('data is', response.data);
-
             setCategories(response.data.data.categories);
         } catch (error) {
             console.error('Error fetching categories:', error);
         } finally {
-            setLoading(false); 
+            setLoading(false);
+        }
+    };
+
+    const fetchVendorData = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get(`/bills/vendors/${id}`);
+            setVendorData({
+                provider_name: response.data.data.provider_name ?? "",
+                bill_id: response.data.data.bill_category?._id ?? ""
+            });
+
+        } catch (err) {
+            setError('Failed to load vendor data.');
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        const fetchVendorData = async () => {
-            // console.log('in function');
-            try {
-                setLoading(true);
-                const response = await api.get(`/bills/vendors/${id}`);
-                console.log("SIngle VENDOR DATA: ", response)
-                setVendorData({
-                    provider_name: response.data.data.provider_name ?? "",
-                    bill_id: response.data.data.bill_category._id ?? "",
-
-                });
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to load category data.');
-                setLoading(false);
-            } finally {
-                setLoading(false); // Hide spinner
-            }
-        };
         fetchVendorData();
         fetchCategories();
-
     }, [id]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setVendorData((prev) => ({ ...prev, [name]: value }));
+    };
 
     const handleBack = () => {
         navigate(-1); // Go back to the previous page
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        // Handle form submission logic here
+        try {
+            setLoading(true);
+            const response = await api.put(`/bills/vendors/${id}`, {
+                provider_name: vendorData.provider_name,
+                bill_category: vendorData.bill_id
+            });
+            // alert('Vendor updated successfully!');
+            setSuccess('Vendor updated successfully!');
+            setTimeout(() => {
+                navigate('/vendors');
+            }, 2000);
+
+            // navigate(-1); // Redirect to the previous page
+        } catch (error) {
+            // console.error('Error updating vendor:', error);
+            setError('Failed to update vendor.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -75,30 +91,41 @@ const EditVendor = () => {
                     <CButton color="secondary" size="sm" onClick={handleBack}>Back</CButton>
                 </CCardHeader>
                 <CCardBody>
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {success && <div className="alert alert-success">{success}</div>}
                     <CForm onSubmit={handleSubmit}>
                         {/* Vendor Name Field */}
                         <div className="mb-3">
                             <CFormLabel htmlFor="name">Vendor Name</CFormLabel>
-                            <CFormInput type="text" id="name" placeholder="Vendor name" value={vendorData.provider_name} required />
+                            <CFormInput
+                                type="text"
+                                id="name"
+                                name="provider_name"
+                                placeholder="Vendor name"
+                                value={vendorData.provider_name}
+                                onChange={handleInputChange}
+                                required
+                            />
                         </div>
 
                         {/* Type Dropdown */}
                         <div className="mb-3">
                             <CFormLabel htmlFor="type">Type</CFormLabel>
-                            <CFormSelect id="type" required value={vendorData.bill_id} >
+                            <CFormSelect
+                                id="type"
+                                name="bill_id"
+                                value={vendorData.bill_id}
+                                onChange={handleInputChange}
+                                required
+                            >
                                 <option value="">Select type</option>
-                                {categories.map((category, index) => (
-                                    <option key={category._id} value={category._id}
-                                    >{category.name}</option>
+                                {categories.map((category) => (
+                                    <option key={category._id} value={category._id}>
+                                        {category.name}
+                                    </option>
                                 ))}
                             </CFormSelect>
                         </div>
-
-                        {/* File Upload */}
-                        {/* <div className="mb-3">
-                            <CFormLabel htmlFor="fileUpload">Upload Document</CFormLabel>
-                            <CFormInput type="file" id="fileUpload" required />
-                        </div> */}
 
                         {/* Submit Button */}
                         <CButton type="submit" color="primary">Submit</CButton>
@@ -107,7 +134,6 @@ const EditVendor = () => {
             </CCard>
         </div>
     );
-
 };
 
 export default EditVendor;

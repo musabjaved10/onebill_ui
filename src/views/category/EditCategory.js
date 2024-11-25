@@ -3,8 +3,6 @@ import {
   CCard, 
   CCardHeader, 
   CCardBody, 
-  CCardTitle, 
-  CCardText, 
   CButton, 
   CForm, 
   CFormLabel, 
@@ -17,50 +15,51 @@ import SpinnerOverlay from '../../components/SpinnerOverlay';
 const EditCategory = () => {
   const { id } = useParams(); // Get category ID from route
   const navigate = useNavigate();
-  // const [categoryData, setCategoryData] = useState(null); // State for category data
-
   const [categoryData, setCategoryData] = useState({
     name: ''
   });
-
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  // Fetch category data when the component loads
   useEffect(() => {
     const fetchCategoryData = async () => {
-      // console.log('in function');
       try {
         setLoading(true);
-        const response = await api.get(`/bills/categories/${id}`); // API call with user ID
-        console.log("SIngle CATEGORY DATA: ", response)
+        const response = await api.get(`/bills/categories/${id}`);
         setCategoryData({
-          name: response.data.data.name ?? "",
-          
+          name: response.data.data.name ?? '',
         });
         setLoading(false);
       } catch (err) {
         setError('Failed to load category data.');
         setLoading(false);
-      } finally {
-        setLoading(false); // Hide spinner
       }
     };
     fetchCategoryData();
   }, [id]);
 
-
-
+  // Handle form submission to edit the category
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      setLoading(true);
+      const response = await api.put(`/bills/categories/${id}`, categoryData);
+      setSuccess('Category updated successfully!');
+      setLoading(false);
+      setTimeout(() => {
+        navigate('/category'); 
+      }, 2000);
+    } catch (err) {
+      setError('Failed to update category.');
+      setLoading(false);
+    }
+  };
 
   const handleBack = () => {
     navigate(-1); // Go back to the previous page
   };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Handle form submission logic here (e.g., API call to update the category)
-  };
-
-  // if (loading) return <div>Loading...</div>;
-  // if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="container mt-5">
@@ -71,12 +70,15 @@ const EditCategory = () => {
           <CButton color="secondary" size="sm" onClick={handleBack}>Back</CButton>
         </CCardHeader>
         <CCardBody>
+          {error && <div className="alert alert-danger">{error}</div>}
+          {success && <div className="alert alert-success">{success}</div>}
           <CForm onSubmit={handleSubmit}>
             <div className="mb-3">
               <CFormLabel htmlFor="name">Category Name</CFormLabel>
               <CFormInput 
                 type="text" 
-                id="name" 
+                id="name"
+                name="name"
                 placeholder="Enter name" 
                 required 
                 value={categoryData?.name || ''} 

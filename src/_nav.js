@@ -47,12 +47,12 @@ const _nav = [
     to: '/bills',
     icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: 'Bill Types',
-    to: '/bill-types',
-    icon: <CIcon icon={cilLayers} customClassName="nav-icon" />,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Bill Types',
+  //   to: '/bill-types',
+  //   icon: <CIcon icon={cilLayers} customClassName="nav-icon" />,
+  // },
   {
     component: CNavItem,
     name: 'User Wallet',

@@ -1,18 +1,55 @@
-// EditUser.js
-import React from 'react';
+import React, { useState } from 'react';
 import { CCard, CCardHeader, CCardBody, CCardTitle, CCardText, CButton, CForm, CFormLabel, CFormInput, CFormSelect } from '@coreui/react';
 import { useNavigate } from 'react-router-dom';
+// import axios from 'axios';
+import api from '../../api/apiWrapper';
+
 
 const AddVendor = () => {
     const navigate = useNavigate();
 
-    const handleBack = () => {
-        navigate(-1); // Go back to the previous page
+    // State to manage form data
+    const [vendorData, setVendorData] = useState({
+        provider_name: '',
+        bill_category: '',
+    });
+
+    const [success, setSuccess] = useState('');
+    const [error, setError] = useState('');
+
+
+    // Handle input change
+    const handleChange = (e) => {
+        const { id, value } = e.target;
+        setVendorData((prevData) => ({
+            ...prevData,
+            [id]: value,
+        }));
     };
 
-    const handleSubmit = (event) => {
+    // Handle form submission
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        // Handle form submission logic here
+
+        try {
+            const response = await api.post('/bills/vendors', vendorData);
+            // Handle success (e.g., show a success message or navigate)
+            setSuccess('Vendor created successfully!');
+            setTimeout(() => {
+                navigate('/vendors'); 
+              }, 2000);
+
+            // navigate('/vendors'); // Redirect after successful creation
+        } catch (error) {
+            // Handle error
+            // console.error('Error creating vendor:', error);
+            setError('Failed to update vandor.');
+
+        }
+    };
+
+    const handleBack = () => {
+        navigate(-1); // Go back to the previous page
     };
 
     return (
@@ -23,29 +60,37 @@ const AddVendor = () => {
                     <CButton color="secondary" size="sm" onClick={handleBack}>Back</CButton>
                 </CCardHeader>
                 <CCardBody>
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {success && <div className="alert alert-success">{success}</div>}
                     <CForm onSubmit={handleSubmit}>
                         {/* Vendor Name Field */}
                         <div className="mb-3">
-                            <CFormLabel htmlFor="name">Vendor Name</CFormLabel>
-                            <CFormInput type="text" id="name" placeholder="Enter name" required />
+                            <CFormLabel htmlFor="provider_name">Vendor Name</CFormLabel>
+                            <CFormInput
+                                type="text"
+                                id="provider_name"
+                                placeholder="Enter name"
+                                value={vendorData.provider_name}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
 
-                        {/* Type Dropdown */}
+                        {/* Bill Category Dropdown */}
                         <div className="mb-3">
-                            <CFormLabel htmlFor="type">Type</CFormLabel>
-                            <CFormSelect id="type" required>
-                                <option value="">Select type</option>
-                                <option value="wholesale">Wholesale</option>
-                                <option value="retail">Retail</option>
-                                <option value="supplier">Supplier</option>
+                            <CFormLabel htmlFor="bill_category">Bill Category</CFormLabel>
+                            <CFormSelect
+                                id="bill_category"
+                                value={vendorData.bill_category}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select category</option>
+                                <option value="671a300475f8ba0fc198fd2c">Electricity</option>
+                                <option value="671a305675f8ba0fc198fd33">Gas</option>
+                                {/* Add more options as needed */}
                             </CFormSelect>
                         </div>
-
-                        {/* File Upload */}
-                        {/* <div className="mb-3">
-                            <CFormLabel htmlFor="fileUpload">Upload Document</CFormLabel>
-                            <CFormInput type="file" id="fileUpload" required />
-                        </div> */}
 
                         {/* Submit Button */}
                         <CButton type="submit" color="primary">Submit</CButton>
@@ -54,7 +99,6 @@ const AddVendor = () => {
             </CCard>
         </div>
     );
-
 };
 
 export default AddVendor;

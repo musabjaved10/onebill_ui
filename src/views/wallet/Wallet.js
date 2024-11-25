@@ -1,5 +1,4 @@
-// UserTable.js
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   CTable,
   CTableHead,
@@ -9,13 +8,47 @@ import {
   CTableDataCell,
 } from '@coreui/react'
 import api from '../../api/apiWrapper'
+import SpinnerOverlay from '../../components/SpinnerOverlay';
+import Pagination from '../../components/Pagination';
 
-async function onClick() {
-  const res = await api.get('/bills/vendors')
-  console.log('data is', res.data)
-}
+
+// async function onClick() {
+//   const res = await api.get('/bills/vendors')
+//   console.log('data is', res.data)
+// }
 
 const UserWallet = () => {
+
+  const [userWallets, setUserWallets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+
+
+  const fetchUserWallet = async (page = 1) => {
+    try {
+      setLoading(true); // Show spinner
+      const response = await api.get(`/wallets?page=${page}`);
+      console.log('data is', response.data);
+
+      setUserWallets(response.data.data.accounts); // Set users
+      // setPagination(response.data.data.pagination); // Set pagination info
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false); // Hide spinner
+    }
+  };
+
+  useEffect(() => {
+    fetchUserWallet(currentPage); // Fetch users for the current page
+  }, [currentPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Update current page state
+  };
+
+
   return (
     <div>
       {/* <div className="d-flex justify-content-end mb-3">

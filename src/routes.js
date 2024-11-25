@@ -84,7 +84,7 @@ const routes = [
   { path: '/add-vendor', name: 'AddVendor', element: AddVendors },
   { path: '/edit-vendor/:id', name: 'EditVendor', element: EditVendor },
   { path: '/bills', name: 'Bills', element: Bills },
-  { path: '/edit-bill', name: 'EditBill', element: EditBill },
+  { path: '/edit-bill/:id', name: 'EditBill', element: EditBill },
   { path: '/bill-types', name: 'BillTypes', element: BillTypes },
   { path: '/add-bill-type', name: 'AddBillTypes', element: AddBillTypes },
   { path: '/edit-bill-type', name: 'EditBillTypes', element: EditBillTypes },

@@ -51,6 +51,7 @@ const AllUsers = () => {
                         <CTableHeaderCell scope="col">Name</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Email</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Phone</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Stauts</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Action</CTableHeaderCell>
                     </CTableRow>
                 </CTableHead>
@@ -63,6 +64,11 @@ const AllUsers = () => {
                             <CTableDataCell>{user.first_name + ' ' + user.last_name}</CTableDataCell>
                             <CTableDataCell>{user.email}</CTableDataCell>
                             <CTableDataCell>{user.phone_number || 'N/A'}</CTableDataCell>
+                            <CTableDataCell>
+                                <span className={`badge ${user.is_verified == false ? 'bg-warning' : user.is_verified == true ? 'bg-success' : 'bg-secondary'}`}>
+                                    {user.is_verified === true ? 'Approved' : 'Pending'}
+                                </span>
+                            </CTableDataCell>
                             <CTableDataCell>
                                 <a href={`/#/edit-user/${user._id}`} className="btn btn-primary btn-sm me-2">
                                     Edit
