@@ -61,15 +61,34 @@ const EditBill = () => {
         navigate(-1); // Go back to the previous page
     };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // Handle form submission logic here
+    const handleSubmit = async (event) => {
+        event.preventDefault(); // Prevent form submission reload
+
+        try {
+            setLoading(true); // Show loading spinner while processing
+            const response = await api.put(`/bills/accounts/${id}`, { status: billData.status });
+
+            if (response.status === 200) {
+                setSuccess('Status updated successfully!');
+            } else {
+                setError('Failed to update the status. Please try again.');
+            }
+        } catch (err) {
+            console.error('Error updating status:', err);
+            setError('Failed to update the status. Please try again.');
+        } finally {
+            setLoading(false);
+            setTimeout(() => {
+                navigate('/bills');
+            }, 2000);
+        }
     };
+
 
 
     const handleStatusChange = (e) => {
         const { value } = e.target;
-        setUserData((prevState) => ({
+        setBillData((prevState) => ({
             ...prevState,
             status: value,
         }));
@@ -85,6 +104,8 @@ const EditBill = () => {
                     <CButton color="secondary" size="sm" onClick={handleBack}>Back</CButton>
                 </CCardHeader>
                 <CCardBody>
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {success && <div className="alert alert-success">{success}</div>}
                     <CForm onSubmit={handleSubmit}>
                         <div className="mb-3">
                             <CFormLabel htmlFor="name">User Name</CFormLabel>

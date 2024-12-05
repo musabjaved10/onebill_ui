@@ -10,6 +10,9 @@ const AddCategory = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
 
   const handleBack = () => {
     navigate(-1);
@@ -22,14 +25,17 @@ const AddCategory = () => {
       setLoading(true);
       const response = await api.post('/bills/categories', { name });
       if (response.status === 201 || response.status === 200) {
-        alert('Category added successfully!');
-        navigate(-1);
+        setSuccess('Category added successfully!');
+        setTimeout(() => {
+          navigate(-1);
+      }, 2000);
+        // navigate(-1);
       } else {
-        alert('Failed to add category.');
+        setError('Failed to add category.')
       }
     } catch (error) {
       console.error('Error adding category:', error);
-      alert('An error occurred while adding the category.');
+      setError('An error occured while adding the category');
     } finally {
       setLoading(false);
     }
@@ -47,6 +53,8 @@ const AddCategory = () => {
           </CButton>
         </CCardHeader>
         <CCardBody>
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
           <CForm onSubmit={handleSubmit}>
             <div className="mb-3">
               <CFormLabel htmlFor="name">Category Name</CFormLabel>

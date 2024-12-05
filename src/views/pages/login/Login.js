@@ -22,8 +22,6 @@ import axios from 'axios'
 const Login = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [otp, setOtp] = useState('')
-  const [isOtpStep, setIsOtpStep] = useState(false)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -50,47 +48,19 @@ const Login = () => {
       })
 
       if (response.status === 200) {
-        setEmail(username)
-        setIsOtpStep(true)
-      } else {
-        setError('Login failed. Please check your credentials.')
-      }
-    } catch (err) {
-      console.error(err)
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await axios.post(
-        `https://onebill.onrender.com/api/v1/auth/login/verify-otp`,
-        {
-          email,
-          otpCode: otp,
-        },
-      )
-
-      if (response.status === 200) {
         const { accessToken, refreshToken } = response.data.data.tokens
 
         localStorage.setItem('authToken', accessToken)
         localStorage.setItem('refreshToken', refreshToken)
 
         dispatch(loginSuccess({ username: email, accessToken }))
-        navigate('/') // Redirect to home or dashboard
+        navigate('/')
       } else {
-        setError('Invalid or expired OTP code.')
+        setError('Login failed. Please check your credentials.')
       }
     } catch (err) {
       console.error(err)
-      setError('Invalid or expired OTP code.')
+      setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -104,7 +74,6 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  {!isOtpStep ? (
                     <CForm onSubmit={handleLogin}>
                       <h1>Login</h1>
                       <p className="text-body-secondary">Sign In to your account</p>
@@ -150,33 +119,7 @@ const Login = () => {
                         </CCol>
                       </CRow>
                     </CForm>
-                  ) : (
-                    <CForm onSubmit={handleOtpSubmit}>
-                      <h1>Enter OTP</h1>
-                      <p className="text-body-secondary">Check your email for the OTP code</p>
-                      {error && <p className="text-danger">{error}</p>}
-                      <CInputGroup className="mb-3">
-                        <CInputGroupText>OTP</CInputGroupText>
-                        <CFormInput
-                          placeholder="Enter OTP"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                        />
-                      </CInputGroup>
-                      <CRow>
-                        <CCol xs={6}>
-                          <CButton
-                            type="submit"
-                            color="primary"
-                            className="px-4"
-                            disabled={loading}
-                          >
-                            {loading ? 'Verifying...' : 'Submit OTP'}
-                          </CButton>
-                        </CCol>
-                      </CRow>
-                    </CForm>
-                  )}
+                  
                 </CCardBody>
               </CCard>
             </CCardGroup>
