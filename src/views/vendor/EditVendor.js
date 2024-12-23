@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { CCard, CCardHeader, CCardBody, CCardTitle, CCardText, CButton, CForm, CFormLabel, CFormInput, CFormSelect } from '@coreui/react';
+import { CCard, CCardHeader, CCardBody, CCardTitle, CCardText, CButton, CForm, CFormLabel, CFormInput, CFormSelect, CInputGroup, CInputGroupText } from '@coreui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/apiWrapper';
 import SpinnerOverlay from '../../components/SpinnerOverlay';
 
 const EditVendor = () => {
+    // console.log('hello');
+    // exit()
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -33,6 +35,7 @@ const EditVendor = () => {
         try {
             setLoading(true);
             const response = await api.get(`/bills/vendors/${id}`);
+            console.log(response)
             setVendorData({
                 provider_name: response.data.data.provider_name ?? "",
                 bill_id: response.data.data.bill_category?._id ?? ""
@@ -62,23 +65,67 @@ const EditVendor = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            setLoading(true);
-            const response = await api.put(`/bills/vendors/${id}`, {
-                provider_name: vendorData.provider_name,
-                bill_category: vendorData.bill_id
-            });
-            // alert('Vendor updated successfully!');
-            setSuccess('Vendor updated successfully!');
-            setTimeout(() => {
-                navigate('/vendors');
-            }, 2000);
+            setLoading(true); // Start loading state
 
-            // navigate(-1); // Redirect to the previous page
+            const imageFile = document.querySelector('#vendor-image').files[0];
+            let uploadedImageUrl = null;
+
+            console.log('Selected Image File:', imageFile);
+
+            // Check if an image file is uploaded
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+
+                console.log('Uploading image...');
+                // Upload image to the /upload-image API
+                const uploadResponse = await api.post('/media/upload-image', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                console.log('Upload response:', uploadResponse);
+
+                if (uploadResponse.status === 200) {
+                    uploadedImageUrl = uploadResponse.data.imageUrl; // Assuming API returns image URL
+                    console.log('Image uploaded successfully:', uploadedImageUrl);
+                } else {
+                    console.error('Image upload failed, response status:', uploadResponse.status);
+                    setError('Image upload failed.');
+                    return; // Stop further execution
+                }
+            } else {
+                console.warn('No image file selected.');
+            }
+
+            const vendorUpdateData = {
+                provider_name: vendorData.provider_name,
+                bill_category: vendorData.bill_id,
+            };
+
+            if (uploadedImageUrl) {
+                vendorUpdateData.image = uploadedImageUrl;
+            }
+
+            console.log('Updating vendor data:', vendorUpdateData);
+            const response = await api.put(`/bills/vendors/${id}`, vendorUpdateData);
+
+            if (response.status === 200) {
+                console.log('Vendor updated successfully:', response.data);
+                setSuccess('Vendor updated successfully!');
+                setTimeout(() => {
+                    navigate('/vendors');
+                }, 2000);
+            } else {
+                console.error('Vendor update failed, response status:', response.status);
+                setError('Failed to update vendor.');
+            }
         } catch (error) {
-            // console.error('Error updating vendor:', error);
+            console.error('Error during vendor update process:', error);
             setError('Failed to update vendor.');
         } finally {
-            setLoading(false);
+            setLoading(false); // End loading state
         }
     };
 
@@ -125,6 +172,10 @@ const EditVendor = () => {
                                     </option>
                                 ))}
                             </CFormSelect>
+                        </div>
+                        <div className='mb-3'>
+                            <CFormLabel htmlFor="type">File</CFormLabel>
+                            <CFormInput type="file" id="vendor-image" name='vendor-image' />
                         </div>
 
                         {/* Submit Button */}

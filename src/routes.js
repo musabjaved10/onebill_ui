@@ -89,7 +89,7 @@ const routes = [
   { path: '/add-bill-type', name: 'AddBillTypes', element: AddBillTypes },
   { path: '/edit-bill-type', name: 'EditBillTypes', element: EditBillTypes },
   { path: '/user-wallet', name: 'UserWallet', element: UserWallet },
-  { path: '/view-wallet', name: 'ViewUserWallet', element: ViewUserWallet },
+  { path: '/view-wallet/:id', name: 'ViewUserWallet', element: ViewUserWallet },
 
 
 

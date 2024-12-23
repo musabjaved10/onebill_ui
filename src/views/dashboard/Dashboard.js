@@ -333,27 +333,160 @@
 // export default Dashboard
 
 
-
-
-import React from 'react';
-import { CCard, CCardBody, CCardHeader, CCardTitle } from '@coreui/react';
+import React, { useState, useEffect } from 'react';
+import SpinnerOverlay from '../../components/SpinnerOverlay';
+import api from '../../api/apiWrapper';
 
 const Dashboard = () => {
+    const [dashboardData, setDashboardData] = useState(null); // Default to null to handle loading
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get(`/stats/bills`);
+            console.log(response);
+            setDashboardData(response.data.data); // Save the data
+        } catch (err) {
+            console.error('Error fetching dashboard data:', err);
+            setError('Failed to load dashboard data. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    if (loading) {
+        return <SpinnerOverlay isLoading={loading} />;
+    }
+
+    if (error) {
+        return (
+            <div className="alert alert-danger text-center" role="alert">
+                {error}
+            </div>
+        );
+    }
+
+    // Destructure data safely
+    const {
+        average_bill_amount = {},
+        current_due_bills = {},
+        overdue_bills = {},
+        paid_bills = {}
+    } = dashboardData || {};
+
     return (
         <div className="container mt-5">
-            <CCard>
-                <CCardHeader className="text-center">
-                    <h4>Welcome to OnePay Bill Admin Panel</h4>
-                </CCardHeader>
-                <CCardBody className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
-                    <div className="text-center">
-                        <h2>Welcome to the Dashboard</h2>
-                        <p className="lead">Manage and monitor all your bill payment activities here.</p>
-                    </div>
-                </CCardBody>
-            </CCard>
+            {/* Message Banner */}
+            <div className="alert alert-info text-center py-3 rounded" style={{ backgroundColor: '#e3f2fd', color: '#0d47a1' }}>
+                <strong>{dashboardData.message || 'Welcome to the dashboard!'}</strong>
+            </div>
+
+            {/* Dashboard Cards */}
+            <div className="row g-4">
+                {/* Average Bill Amount */}
+                <DashboardCard
+                    title="Average Bill (This Month)"
+                    value={average_bill_amount.this_month?.toFixed(2) || 'N/A'}
+                    color="#e7f3ff"
+                    textColor="#1565c0"
+                    icon="fas fa-calendar-alt"
+                />
+                <DashboardCard
+                    title="Average Bill (This Year)"
+                    value={average_bill_amount.this_year?.toFixed(2) || 'N/A'}
+                    color="#e7f3ff"
+                    textColor="#1565c0"
+                    icon="fas fa-calendar-check"
+                />
+                <DashboardCard
+                    title="Average Bill (Overall)"
+                    value={average_bill_amount.overall?.toFixed(2) || 'N/A'}
+                    color="#e7f3ff"
+                    textColor="#1565c0"
+                    icon="fas fa-chart-line"
+                />
+
+                {/* Current Due Bills */}
+                <DashboardCard
+                    title="Current Due Bills (Count)"
+                    value={current_due_bills.total_count || 0}
+                    color="#fff7e6"
+                    textColor="#f57f17"
+                    icon="fas fa-file-invoice"
+                />
+                <DashboardCard
+                    title="Current Due Bills (Amount)"
+                    value={current_due_bills.total_amount?.toFixed(2) || 'N/A'}
+                    color="#fff7e6"
+                    textColor="#f57f17"
+                    icon="fas fa-dollar-sign"
+                />
+
+                {/* Overdue Bills */}
+                <DashboardCard
+                    title="Overdue Bills (Count)"
+                    value={overdue_bills.total_count || 0}
+                    color="#ffe5e5"
+                    textColor="#b71c1c"
+                    icon="fas fa-exclamation-circle"
+                />
+                <DashboardCard
+                    title="Overdue Bills (Amount)"
+                    value={overdue_bills.total_amount?.toFixed(2) || 'N/A'}
+                    color="#ffe5e5"
+                    textColor="#b71c1c"
+                    icon="fas fa-dollar-sign"
+                />
+
+                {/* Paid Bills */}
+                <DashboardCard
+                    title="Paid Bills (This Month)"
+                    value={paid_bills.this_month?.total_amount?.toFixed(2) || 'N/A'}
+                    color="#e8f7e8"
+                    textColor="#2e7d32"
+                    icon="fas fa-check-circle"
+                />
+                <DashboardCard
+                    title="Paid Bills (This Year)"
+                    value={paid_bills.this_year?.total_amount?.toFixed(2) || 'N/A'}
+                    color="#e8f7e8"
+                    textColor="#2e7d32"
+                    icon="fas fa-calendar-check"
+                />
+            </div>
         </div>
     );
 };
+
+// Reusable Card Component
+const DashboardCard = ({ title, value, color, textColor, icon }) => (
+    <div className="col-md-4">
+        <div
+            className="card border-0 shadow-sm h-100"
+            style={{
+                background: `linear-gradient(135deg, ${color}, #ffffff)`,
+                borderRadius: '12px',
+            }}
+        >
+            <div className="card-body d-flex align-items-center">
+                <div className="me-3">
+                    <i className={`${icon} fa-2x`} style={{ color: textColor }}></i>
+                </div>
+                <div>
+                    <h6 className="fw-bold" style={{ color: textColor }}>
+                        {title}
+                    </h6>
+                    <h4 className="mb-0">{value}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+);
 
 export default Dashboard;

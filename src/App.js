@@ -3,7 +3,10 @@ import { HashRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { loginSuccess } from './redux/actions/authActions'
 import { CSpinner, useColorModes } from '@coreui/react'
+import { Helmet } from 'react-helmet'
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import './scss/style.scss'
+
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
@@ -42,6 +45,17 @@ const App = () => {
   }, [dispatch, isColorModeSet, setColorMode, storedTheme])
 
   return (
+    <>
+    <Helmet>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+          defer
+        ></script>
+      </Helmet>
     <HashRouter>
       <Suspense
         fallback={
@@ -49,7 +63,7 @@ const App = () => {
             <CSpinner color="primary" variant="grow" />
           </div>
         }
-      >
+        >
         <Routes>
           <Route exact path="/login" name="Login Page" element={<Login />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />
@@ -61,10 +75,11 @@ const App = () => {
             path="*"
             name="Home"
             element={isAuthenticated ? <DefaultLayout /> : <Navigate to="/login" />}
-          />
+            />
         </Routes>
       </Suspense>
     </HashRouter>
+            </>
   )
 }
 

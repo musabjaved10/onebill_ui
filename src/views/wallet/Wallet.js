@@ -31,8 +31,8 @@ const UserWallet = () => {
       const response = await api.get(`/wallets?page=${page}`);
       console.log('data is', response.data);
 
-      setUserWallets(response.data.data.accounts); // Set users
-      // setPagination(response.data.data.pagination); // Set pagination info
+      setUserWallets(response.data.data.wallets); // Set users
+      setPagination(response.data.data.pagination); // Set pagination info
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -51,6 +51,8 @@ const UserWallet = () => {
 
   return (
     <div>
+      <SpinnerOverlay isLoading={loading} />
+
       {/* <div className="d-flex justify-content-end mb-3">
                 <a href="/#/add-bill-type" className="btn btn-primary">Add Bill Type</a>
             </div> */}
@@ -59,50 +61,42 @@ const UserWallet = () => {
           <CTableRow>
             <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
             <CTableHeaderCell scope="col">User Name</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Email</CTableHeaderCell>
+            {/* <CTableHeaderCell scope="col">Email</CTableHeaderCell> */}
             <CTableHeaderCell scope="col">Current Amount</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Overdrawn Amount</CTableHeaderCell>
             <CTableHeaderCell scope="col">Action</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>
-          <CTableRow>
-            <CTableHeaderCell scope="row">1</CTableHeaderCell>
-            <CTableDataCell>John</CTableDataCell>
-            <CTableDataCell>john@gmail.com</CTableDataCell>
-            <CTableDataCell>300$</CTableDataCell>
-            <CTableDataCell>
-              {/* <button className="btn btn-primary btn-sm me-2">Edit</button> */}
-              <a href="/#/view-wallet" className="btn btn-primary btn-sm me-2">
-                View Details
-              </a>
-              {/* <button className="btn btn-danger btn-sm">Delete</button> */}
-            </CTableDataCell>
-          </CTableRow>
-          <CTableRow>
-            <CTableHeaderCell scope="row">2</CTableHeaderCell>
-            <CTableDataCell>Wick</CTableDataCell>
-            <CTableDataCell>wick@gmail.com</CTableDataCell>
-            <CTableDataCell>250$</CTableDataCell>
-            <CTableDataCell>
-              <a href="/#/view-wallet" className="btn btn-primary btn-sm me-2">
-                View Details
-              </a>
-            </CTableDataCell>
-          </CTableRow>
-          <CTableRow>
-            <CTableHeaderCell scope="row">3</CTableHeaderCell>
-            <CTableDataCell>Sam</CTableDataCell>
-            <CTableDataCell>sam@gmail.com</CTableDataCell>
-            <CTableDataCell>175$</CTableDataCell>
-            <CTableDataCell>
-              <a href="/#/view-wallet" className="btn btn-primary btn-sm me-2">
-                View Details
-              </a>
-              <button onClick={() => onClick()}>Make call</button>
-            </CTableDataCell>
-          </CTableRow>
+          {userWallets.map((userWallet, index) => (
+            <CTableRow key={userWallet._id}>
+              <CTableHeaderCell scope="row">
+                {pagination.limit * (currentPage - 1) + index + 1}
+              </CTableHeaderCell>
+              <CTableDataCell>{userWallet.user?.first_name || 'No Name'}</CTableDataCell>
+              {/* <CTableDataCell>{userWallet.user?.email || 'test@gmail.com'}</CTableDataCell> */}
+              <CTableDataCell>{userWallet.balance ?? ''}</CTableDataCell>
+              <CTableDataCell>{userWallet.overdrawn_balance ?? ''}</CTableDataCell>
+              <CTableDataCell className="text-center">
+                <a href={`/#/edit-wallet/${userWallet._id}`} className="me-2"><i className="bi bi-pencil-square"></i></a>
+                <a href={`/#/view-wallet/${userWallet._id}`} className="text-secondary me-2">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a href="#" class="text-danger">
+                  <i class="bi bi-trash3-fill"></i>
+                </a>
+              </CTableDataCell>
+            </CTableRow>
+          ))}
+
         </CTableBody>
       </CTable>
+      {/* Pagination Component */}
+      <Pagination
+        totalPages={pagination.totalPages || 1}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 }
