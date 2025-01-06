@@ -5,8 +5,8 @@ import Pagination from '../../components/Pagination';
 import api from '../../api/apiWrapper';
 
 const Bills = () => {
-    const [bills, setBills] = useState([]);
-    const [filteredBills, setFilteredBills] = useState([]);
+    const [billInvoices, setBillInvoices] = useState([]);
+    // const [filteredBills, setFilteredBills] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
@@ -15,43 +15,44 @@ const Bills = () => {
     const fetchBills = async (page = 1) => {
         try {
             setLoading(true); // Show spinner
-            const response = await api.get(`/bills/accounts?page=${page}`);
+            const response = await api.get(`/bills/invoices`);
             console.log('data is', response.data);
 
-            const billsData = response.data.data.accounts;
-            setBills(billsData); // Set bills
-            setFilteredBills(billsData); // Set filtered bills initially
+            const billInvoice = response.data.data.invoices;
+            setBillInvoices(billInvoice); // Set bills
+            setFilteredBills(billInvoice); // Set filtered bills initially
             setPagination(response.data.data.pagination); // Set pagination info
         } catch (error) {
             console.error('Error fetching bills:', error);
         } finally {
-            setLoading(false); // Hide spinner
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchBills(currentPage); // Fetch bills for the current page
+        fetchBills(currentPage);
     }, [currentPage]);
 
     const handlePageChange = (page) => {
-        setCurrentPage(page); // Update current page state
+        setCurrentPage(page);
     };
 
     const handleSearchChange = (e) => {
         const value = e.target.value.toLowerCase();
         setSearchTerm(value);
 
-        // Filter bills based on the search term
-        const filtered = bills.filter((bill) =>
-            bill.first_name_on_bill.toLowerCase().includes(value) ||
-            bill.last_name_on_bill.toLowerCase().includes(value) ||
-            bill.account_number?.toLowerCase().includes(value) ||
-            bill.service_provider_info.provider_name.toLowerCase().includes(value) ||
-            bill.service_provider_info.email.toLowerCase().includes(value) ||
-            bill.status.toLowerCase().includes(value)
-        );
+    // Filter bills based on the search term
+    const filtered = billInvoices.filter((billInvoice) =>
+        billInvoice.bill_account.account_number.includes(value) ||
+        billInvoice.bill_account.bill_category.name.toLowerCase().includes(value) ||
+        billInvoice.bill_account.bill_vendor.provider_name.toLowerCase().includes(value) ||
+        billInvoice.amount.includes(value) ||
+        billInvoice.month.includes(value) ||
+        billInvoice.year.includes(value) ||
+        billInvoice.status.toLowerCase().includes(value)
+    );
 
-        setFilteredBills(filtered);
+    setFilteredBills(filtered);
     };
 
     return (
@@ -59,7 +60,7 @@ const Bills = () => {
             <SpinnerOverlay isLoading={loading} />
 
             {/* Search Bar */}
-            <div className="d-flex justify-content-between mb-3">
+            {/* <div className="d-flex justify-content-between mb-3">
                 <input
                     type="text"
                     className="form-control w-50"
@@ -67,49 +68,56 @@ const Bills = () => {
                     value={searchTerm}
                     onChange={handleSearchChange}
                 />
+            </div> */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <input
+                    type="text"
+                    className="form-control w-50"
+                    placeholder="Search bill invoice..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                />
+                <a href="/#/create-invoice" className="btn btn-primary">Create Invoice</a>
             </div>
 
             <CTable bordered>
                 <CTableHead>
                     <CTableRow>
                         <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Name</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Bill Category</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Provider Name</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Provider Email</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Provider Website</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Month / Year</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Status</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Action</CTableHeaderCell>
                     </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                    {filteredBills.map((bill, index) => (
-                        <CTableRow key={bill._id}>
+                    {billInvoices.map((billInvoice, index) => (
+                        <CTableRow key={billInvoice._id}>
                             <CTableHeaderCell scope="row">
                                 {pagination.limit * (currentPage - 1) + index + 1}
                             </CTableHeaderCell>
-                            <CTableDataCell>{bill.first_name_on_bill + " " + bill.last_name_on_bill}</CTableDataCell>
-                            <CTableDataCell>{bill.account_number ?? ''}</CTableDataCell>
-                            <CTableDataCell>{bill.service_provider_info.provider_name ?? ''}</CTableDataCell>
-                            <CTableDataCell>{bill.service_provider_info.email ?? ''}</CTableDataCell>
-                            <CTableDataCell>{bill.service_provider_info.website ?? ''}</CTableDataCell>
+                            <CTableDataCell>{billInvoice.bill_account.account_number ?? ''}</CTableDataCell>
+                            <CTableDataCell>{billInvoice.bill_account.bill_category.name ?? ''}</CTableDataCell>
+                            <CTableDataCell>{billInvoice.bill_account.bill_vendor.provider_name ?? ''}</CTableDataCell>
+                            <CTableDataCell>{"$" + billInvoice.amount ?? ''}</CTableDataCell>
+                            <CTableDataCell>{billInvoice.month + "-" + billInvoice.year}</CTableDataCell>
                             <CTableDataCell>
                                 <span
-                                    className={`badge ${
-                                        bill.status === 'pending'
-                                            ? 'bg-warning'
-                                            : bill.status === 'approved'
-                                            ? 'bg-success'
-                                            : 'bg-secondary'
-                                    }`}
+                                    className={`badge ${billInvoice.status === 'paid' ? 'bg-success' : 'bg-warning'
+                                        }`}
                                 >
-                                    {bill.status}
+                                    {billInvoice.status === 'paid' ? 'Paid' : 'Not Paid'}
                                 </span>
                             </CTableDataCell>
                             <CTableDataCell>
-                                <a href={`/#/edit-bill/${bill._id}`} className="btn btn-primary btn-sm me-2">
+                                {/* <a href={`/#/edit-bill/${billInvoice._id}`} className="btn btn-primary btn-sm me-2">
                                     Edit
-                                </a>
+                                </a> */}
+                                <button className="btn btn-primary btn-sm">Edit</button>
+                                <button className="btn btn-secondary btn-sm">View</button>
                                 <button className="btn btn-danger btn-sm">Delete</button>
                             </CTableDataCell>
                         </CTableRow>

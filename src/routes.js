@@ -15,6 +15,8 @@ const AddBillTypes = React.lazy(() => import('./views/billType/AddBillTypes.js')
 const EditBillTypes = React.lazy(() => import('./views/billType/EditBillTypes.js'))
 const UserWallet = React.lazy(() => import('./views/wallet/Wallet.js'))
 const ViewUserWallet = React.lazy(() => import('./views/wallet/ViewWallet.js'))
+const BillInvoice = React.lazy(() => import('./views/billInvoice/index.js'))
+const CreateInvoice = React.lazy(() => import('./views/billInvoice/create.js'))
 
 
 
@@ -90,6 +92,8 @@ const routes = [
   { path: '/edit-bill-type', name: 'EditBillTypes', element: EditBillTypes },
   { path: '/user-wallet', name: 'UserWallet', element: UserWallet },
   { path: '/view-wallet/:id', name: 'ViewUserWallet', element: ViewUserWallet },
+  { path: '/bill-invoice', name: 'BillInvoice', element: BillInvoice },
+  { path: '/create-invoice', name: 'CreateInvoice', element: CreateInvoice },
 
 
 
