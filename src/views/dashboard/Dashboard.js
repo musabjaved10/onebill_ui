@@ -51,7 +51,7 @@ const Dashboard = () => {
         fetchDashboardData();
     }, []);
 
-        useEffect(() => {
+    useEffect(() => {
         fetchBillData(currentPage);
     }, [currentPage]);
 
@@ -85,7 +85,7 @@ const Dashboard = () => {
         <div className="container mt-5">
             {/* Message Banner */}
             <div className="alert alert-info text-center py-3 rounded" style={{ backgroundColor: '#e3f2fd', color: '#0d47a1' }}>
-                <strong>{dashboardData.message || 'Welcome to the dashboard!'}</strong>
+                <strong>{'Welcome to the dashboard!'}</strong>
             </div>
 
             {/* Dashboard Cards */}
@@ -93,21 +93,34 @@ const Dashboard = () => {
                 {/* Average Bill Amount */}
                 <DashboardCard
                     title="Average Bill (This Month)"
-                    value={average_bill_amount.this_month?.toFixed(2) || 'N/A'}
+                    value={
+                        <span className="dark-mode-black">
+                            {average_bill_amount.this_month?.toFixed(2) || 'N/A'}
+                        </span>
+                    }
                     color="#e7f3ff"
                     textColor="#1565c0"
                     icon="fas fa-calendar-alt"
+
                 />
+
                 <DashboardCard
                     title="Average Bill (This Year)"
-                    value={average_bill_amount.this_year?.toFixed(2) || 'N/A'}
+                    value={
+                        <span className="dark-mode-black">
+                            {average_bill_amount.this_year?.toFixed(2) || 'N/A'}
+                        </span>
+                    }
                     color="#e7f3ff"
                     textColor="#1565c0"
                     icon="fas fa-calendar-check"
                 />
                 <DashboardCard
                     title="Average Bill (Overall)"
-                    value={average_bill_amount.overall?.toFixed(2) || 'N/A'}
+                    value={<span className="dark-mode-black">
+                        {average_bill_amount.overall?.toFixed(2) || 'N/A'}
+                    </span>
+                    }
                     color="#e7f3ff"
                     textColor="#1565c0"
                     icon="fas fa-chart-line"
@@ -116,14 +129,22 @@ const Dashboard = () => {
                 {/* Current Due Bills */}
                 <DashboardCard
                     title="Current Due Bills (Count)"
-                    value={current_due_bills.total_count || 0}
+                    value={
+                        <span className="dark-mode-black">
+                            {current_due_bills.total_count || 0}
+                        </span>
+                    }
                     color="#fff7e6"
                     textColor="#f57f17"
                     icon="fas fa-file-invoice"
                 />
                 <DashboardCard
                     title="Current Due Bills (Amount)"
-                    value={current_due_bills.total_amount?.toFixed(2) || 'N/A'}
+                    value={
+                        <span className="dark-mode-black">
+                            {current_due_bills.total_amount?.toFixed(2) || 'N/A'}
+                        </span>
+                    }
                     color="#fff7e6"
                     textColor="#f57f17"
                     icon="fas fa-dollar-sign"
@@ -132,14 +153,22 @@ const Dashboard = () => {
                 {/* Overdue Bills */}
                 <DashboardCard
                     title="Overdue Bills (Count)"
-                    value={overdue_bills.total_count || 0}
+                    value={
+                        <span className="dark-mode-black">
+                            {overdue_bills.total_count || 0}
+                        </span>
+                    }
                     color="#ffe5e5"
                     textColor="#b71c1c"
                     icon="fas fa-exclamation-circle"
                 />
                 <DashboardCard
                     title="Overdue Bills (Amount)"
-                    value={overdue_bills.total_amount?.toFixed(2) || 'N/A'}
+                    value={
+                        <span className="dark-mode-black">
+                            {overdue_bills.total_amount?.toFixed(2) || 'N/A'}
+                        </span>
+                    }
                     color="#ffe5e5"
                     textColor="#b71c1c"
                     icon="fas fa-dollar-sign"
@@ -148,26 +177,92 @@ const Dashboard = () => {
                 {/* Paid Bills */}
                 <DashboardCard
                     title="Paid Bills (This Month)"
-                    value={paid_bills.this_month?.total_amount?.toFixed(2) || 'N/A'}
+                    value={
+                        <span className="dark-mode-black">
+                            {paid_bills.this_month?.total_amount?.toFixed(2) || 'N/A'}
+                        </span>
+                    }
                     color="#e8f7e8"
                     textColor="#2e7d32"
                     icon="fas fa-check-circle"
                 />
                 <DashboardCard
                     title="Paid Bills (This Year)"
-                    value={paid_bills.this_year?.total_amount?.toFixed(2) || 'N/A'}
+                    value={
+                        <span className="dark-mode-black">
+                            {paid_bills.this_year?.total_amount?.toFixed(2) || 'N/A'}
+                        </span>
+                    }
                     color="#e8f7e8"
                     textColor="#2e7d32"
                     icon="fas fa-calendar-check"
                 />
             </div>
 
-            <div className="card shadow-sm mt-5">
+            <div className="card shadow-sm mt-5 card-dark-mode">
                 <div className="card-header bg-primary text-white">
                     <h4 className="mb-0">Bills Overview</h4>
                 </div>
-                <div className="table-responsive">
-                    <table className="table table-striped table-hover mb-0">
+                <CTable bordered>
+                    <CTableHead>
+                        <CTableRow>
+                            <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
+                            <CTableHeaderCell scope="col">Name</CTableHeaderCell>
+                            <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
+                            <CTableHeaderCell scope="col">Provider Name</CTableHeaderCell>
+                            <CTableHeaderCell scope="col">Provider Email</CTableHeaderCell>
+                            <CTableHeaderCell scope="col">Provider Website</CTableHeaderCell>
+                            <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+                            <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+                        </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                        {bills && bills.length > 0 ? (
+                            bills.map((bill, index) => (
+                                <CTableRow key={bill._id}>
+                                    <CTableHeaderCell scope="row">
+                                        {pagination.limit * (currentPage - 1) + index + 1}
+                                    </CTableHeaderCell>
+                                    <CTableDataCell>{bill.first_name_on_bill + " " + bill.last_name_on_bill}</CTableDataCell>
+                                    <CTableDataCell>{bill.account_number ?? ''}</CTableDataCell>
+                                    <CTableDataCell>{bill.service_provider_info.provider_name ?? ''}</CTableDataCell>
+                                    <CTableDataCell>{bill.service_provider_info.email ?? ''}</CTableDataCell>
+                                    <CTableDataCell>{bill.service_provider_info.website ?? ''}</CTableDataCell>
+                                    <CTableDataCell>
+                                        <span
+                                            className={`badge ${bill.status === 'pending'
+                                                ? 'bg-warning'
+                                                : bill.status === 'approved'
+                                                    ? 'bg-success'
+                                                    : 'bg-secondary'
+                                                }`}
+                                        >
+                                            {bill.status}
+                                        </span>
+                                    </CTableDataCell>
+                                    <CTableDataCell>
+                                        <a href={`/#/edit-bill/${bill._id}`} className="btn btn-primary btn-sm me-2">
+                                            Edit
+                                        </a>
+                                        <button className="btn btn-danger btn-sm">Delete</button>
+                                    </CTableDataCell>
+                                </CTableRow>
+                            )
+                            ))
+                            : (
+                                <tr>
+                                    <td colSpan="8" className="text-center text-muted">
+                                        No bills available.
+                                    </td>
+                                </tr>
+                            )}
+                    </CTableBody>
+                </CTable>
+
+
+
+                {/* <div className="table-responsive">
+                    <table className="table bordered mb-0">
                         <thead className="bg-light">
                             <tr>
                                 <th>#</th>
@@ -237,7 +332,7 @@ const Dashboard = () => {
                             )}
                         </tbody>
                     </table>
-                </div>
+                </div> */}
                 <div className="card-footer text-end">
                     <Pagination
                         totalPages={pagination.totalPages || 1}

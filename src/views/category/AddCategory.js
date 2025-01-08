@@ -45,7 +45,7 @@ const AddCategory = () => {
     <div className="container mt-5">
             <SpinnerOverlay isLoading={loading} />
 
-      <CCard>
+      <CCard className='card-dark-mode'>
         <CCardHeader className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">Add Category</h5>
           <CButton color="secondary" size="sm" onClick={handleBack}>

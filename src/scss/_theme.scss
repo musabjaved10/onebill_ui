@@ -60,5 +60,13 @@ body {
     .footer {
       --cui-footer-bg: var(--cui-body-bg);
     }
+
+    span.dark-mode-black {
+      color: #2d3640
+    }
+    .card.card-dark-mode {
+      background-color: #2d3640;
+    }
   }
+
 }

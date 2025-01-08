@@ -440,7 +440,7 @@ const EditBill = () => {
     return (
         <div className="container mt-5">
             <SpinnerOverlay isLoading={loading} />
-            <CCard>
+            <CCard className='card-dark-mode'>
                 <CCardHeader className="d-flex justify-content-between align-items-center">
                     <h5>Edit Bill</h5>
                     <CButton color="secondary" size="sm" onClick={() => navigate(-1)}>
