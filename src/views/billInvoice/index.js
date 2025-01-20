@@ -20,7 +20,7 @@ const Bills = () => {
 
             const billInvoice = response.data.data.invoices;
             setBillInvoices(billInvoice); // Set bills
-            setFilteredBills(billInvoice); // Set filtered bills initially
+            // setFilteredBills(billInvoice); // Set filtered bills initially
             setPagination(response.data.data.pagination); // Set pagination info
         } catch (error) {
             console.error('Error fetching bills:', error);
@@ -52,7 +52,7 @@ const Bills = () => {
         billInvoice.status.toLowerCase().includes(value)
     );
 
-    setFilteredBills(filtered);
+    // setFilteredBills(filtered);
     };
 
     return (
@@ -113,10 +113,10 @@ const Bills = () => {
                                 </span>
                             </CTableDataCell>
                             <CTableDataCell>
-                                {/* <a href={`/#/edit-bill/${billInvoice._id}`} className="btn btn-primary btn-sm me-2">
+                                <a href={`/#/edit-invoice/${billInvoice._id}`} className="btn btn-primary btn-sm me-2">
                                     Edit
-                                </a> */}
-                                <button className="btn btn-primary btn-sm">Edit</button>
+                                </a>
+                                {/* <button className="btn btn-primary btn-sm">Edit</button> */}
                                 <button className="btn btn-secondary btn-sm">View</button>
                                 <button className="btn btn-danger btn-sm">Delete</button>
                             </CTableDataCell>
