@@ -39,7 +39,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken')
         if (refreshToken) {
           // https://onebill.onrender.com/api/v1/auth/refresh
-          const response = await axios.post(`https://onebill.onrender.com/api/v1/auth/refresh`, {
+          const response = await axios.post(`https://api.upayonce.com/api/v1/auth/refresh`, {
             refreshToken: refreshToken,
           })
 
