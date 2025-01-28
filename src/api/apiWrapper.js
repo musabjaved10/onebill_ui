@@ -4,7 +4,8 @@ import store from '../redux/store'
 
 // Create an Axios instance
 const api = axios.create({
-  baseURL: 'https://onebill.onrender.com/api/v1', // Base URL from .env
+  // https://onebill.onrender.com/api/v1
+  baseURL: 'https://api.upayonce.com/api/v1', // Base URL from .env
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,6 +38,7 @@ api.interceptors.response.use(
         // Attempt to refresh the token
         const refreshToken = localStorage.getItem('refreshToken')
         if (refreshToken) {
+          // https://onebill.onrender.com/api/v1/auth/refresh
           const response = await axios.post(`https://onebill.onrender.com/api/v1/auth/refresh`, {
             refreshToken: refreshToken,
           })

@@ -13,6 +13,7 @@ const AddVendor = () => {
     const [vendorData, setVendorData] = useState({
         provider_name: '',
         bill_category: '',
+        vendor_url: '',
     });
 
     const [success, setSuccess] = useState('');
@@ -161,6 +162,19 @@ const AddVendor = () => {
                                 {/* Add more options as needed */}
                             </CFormSelect>
                         </div>
+
+                        <div className="mb-3">
+                            <CFormLabel htmlFor="vendor_url">Vendor Url</CFormLabel>
+                            <CFormInput
+                                type="text"
+                                id="vendor_url"
+                                placeholder="Enter web url"
+                                value={vendorData.vendor_url}
+                                onChange={handleChange}
+                                // required
+                            />
+                        </div>
+
                         <div className='mb-3'>
                             <CFormLabel htmlFor="type">File</CFormLabel>
                             <CFormInput type="file" id="vendor-image" name='vendor-image' />

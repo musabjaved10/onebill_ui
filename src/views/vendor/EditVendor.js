@@ -12,7 +12,8 @@ const EditVendor = () => {
 
     const [vendorData, setVendorData] = useState({
         provider_name: '',
-        bill_id: ''
+        bill_id: '',
+        vendor_url: '',
     });
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,7 +39,8 @@ const EditVendor = () => {
             console.log(response)
             setVendorData({
                 provider_name: response.data.data.provider_name ?? "",
-                bill_id: response.data.data.bill_category?._id ?? ""
+                bill_id: response.data.data.bill_category?._id ?? "",
+                vendor_url: response.data.data.vendor_url ?? "",
             });
 
         } catch (err) {
@@ -102,6 +104,7 @@ const EditVendor = () => {
             const vendorUpdateData = {
                 provider_name: vendorData.provider_name,
                 bill_category: vendorData.bill_id,
+                vendor_url: vendorData.vendor_url,
             };
 
             if (uploadedImageUrl) {
@@ -173,6 +176,20 @@ const EditVendor = () => {
                                 ))}
                             </CFormSelect>
                         </div>
+
+                        <div className="mb-3">
+                            <CFormLabel htmlFor="vendor_url">Vendor Url</CFormLabel>
+                            <CFormInput
+                                type="text"
+                                id="vendor_url"
+                                name="vendor_url"
+                                placeholder="Enter web url"
+                                value={vendorData.vendor_url}
+                                onChange={handleInputChange}
+                                // required
+                            />
+                        </div>
+
                         <div className='mb-3'>
                             <CFormLabel htmlFor="type">File</CFormLabel>
                             <CFormInput type="file" id="vendor-image" name='vendor-image' />
