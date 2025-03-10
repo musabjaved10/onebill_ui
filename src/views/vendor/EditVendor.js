@@ -137,7 +137,7 @@ const EditVendor = () => {
             <SpinnerOverlay isLoading={loading} />
             <CCard className='card-dark-mode'>
                 <CCardHeader className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0">Edit Vendor</h5>
+                    <h5 className="mb-0">Edit Service Providor</h5>
                     <CButton color="secondary" size="sm" onClick={handleBack}>Back</CButton>
                 </CCardHeader>
                 <CCardBody>

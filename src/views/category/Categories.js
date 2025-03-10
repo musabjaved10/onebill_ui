@@ -61,7 +61,7 @@ const Categories = () => {
                             <a href={`/#/edit-category/${category._id}`} className="btn btn-primary btn-sm me-2">
                                     Edit
                                 </a>
-                                <button className="btn btn-danger btn-sm">Delete</button>
+                                {/* <button className="btn btn-danger btn-sm">Delete</button> */}
                             </CTableDataCell>
                         </CTableRow>
                     ))}

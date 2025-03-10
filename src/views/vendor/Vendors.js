@@ -1,108 +1,166 @@
 import React, { useState, useEffect } from 'react';
-import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell } from '@coreui/react';
-
+import {
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+  CButton,
+} from '@coreui/react';
+import { toast, ToastContainer } from 'react-toastify'; // Import toast and ToastContainer
 import SpinnerOverlay from '../../components/SpinnerOverlay';
 import Pagination from '../../components/Pagination';
 import api from '../../api/apiWrapper';
+import ConfirmationModal from '../../components/ConfirmationModal'; // Adjust the path as per your project structure
 
 const Vendors = () => {
-    const [vendors, setVendors] = useState([]);
-    const [filteredVendors, setFilteredVendors] = useState([]); // For search filter
-    const [loading, setLoading] = useState(true);
-    const [pagination, setPagination] = useState({});
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchQuery, setSearchQuery] = useState(''); // Search query state
+  const [vendors, setVendors] = useState([]);
+  const [filteredVendors, setFilteredVendors] = useState([]); // For search filter
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(''); // Search query state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedVendorId, setSelectedVendorId] = useState(null);
 
-    const fetchVendors = async (page = 1) => {
-        try {
-            setLoading(true); // Show spinner
-            const response = await api.get(`/bills/vendors?page=${page}`);
-            console.log('data is', response.data);
+  const fetchVendors = async (page = 1) => {
+    try {
+      setLoading(true); // Show spinner
+      const response = await api.get(`/bills/vendors?page=${page}`);
+      console.log('data is', response.data);
 
-            setVendors(response.data.data.vendors); // Set vendors
-            setFilteredVendors(response.data.data.vendors); // Set vendors for filtered view
-            setPagination(response.data.data.pagination); // Set pagination info
-        } catch (error) {
-            console.error('Error fetching vendors:', error);
-        } finally {
-            setLoading(false); // Hide spinner
-        }
-    };
+      setVendors(response.data.data.vendors); // Set vendors
+      setFilteredVendors(response.data.data.vendors); // Set vendors for filtered view
+      setPagination(response.data.data.pagination); // Set pagination info
+    } catch (error) {
+      console.error('Error fetching vendors:', error);
+      toast.error('Failed to fetch vendors!'); // Show error toast
+    } finally {
+      setLoading(false); // Hide spinner
+    }
+  };
 
-    useEffect(() => {
-        fetchVendors(currentPage); // Fetch vendors for the current page
-    }, [currentPage]);
+  useEffect(() => {
+    fetchVendors(currentPage); // Fetch vendors for the current page
+  }, [currentPage]);
 
-    const handlePageChange = (page) => {
-        setCurrentPage(page); // Update current page state
-    };
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Update current page state
+  };
 
-    const handleSearch = (event) => {
-        const query = event.target.value.toLowerCase();
-        setSearchQuery(query);
-        if (query === '') {
-            setFilteredVendors(vendors); // Reset to all vendors when search is empty
-        } else {
-            const filtered = vendors.filter(
-                (vendor) =>
-                    vendor.provider_name?.toLowerCase().includes(query) ||
-                    vendor.bill_category.name?.toLowerCase().includes(query)
-            );
-            setFilteredVendors(filtered);
-        }
-    };
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+    if (query === '') {
+      setFilteredVendors(vendors); // Reset to all vendors when search is empty
+    } else {
+      const filtered = vendors.filter(
+        (vendor) =>
+          vendor.provider_name?.toLowerCase().includes(query) ||
+          vendor.bill_category.name?.toLowerCase().includes(query)
+      );
+      setFilteredVendors(filtered);
+    }
+  };
 
-    return (
-        <div>
-            <SpinnerOverlay isLoading={loading} />
+  const handleDeleteClick = (vendorId) => {
+    setSelectedVendorId(vendorId); // Set the selected vendor ID
+    setShowModal(true); // Show the confirmation modal
+  };
 
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <input
-                    type="text"
-                    className="form-control w-50"
-                    placeholder="Search vendors..."
-                    value={searchQuery}
-                    onChange={handleSearch}
-                />
-                <a href="/#/add-vendor" className="btn btn-primary">Add Vendor</a>
-            </div>
+  const handleDeleteConfirm = async () => {
+    if (!selectedVendorId) return;
 
-            <CTable bordered>
-                <CTableHead>
-                    <CTableRow>
-                        <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Vendor Name</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Category</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Action</CTableHeaderCell>
-                    </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                    {filteredVendors.map((vendor, index) => (
-                        <CTableRow key={vendor._id}>
-                            <CTableHeaderCell scope="row">
-                                {pagination.limit * (currentPage - 1) + index + 1}
-                            </CTableHeaderCell>
-                            <CTableDataCell>{vendor.provider_name ?? ''}</CTableDataCell>
-                            <CTableDataCell>{vendor.bill_category.name ?? ''}</CTableDataCell>
-                            <CTableDataCell>
-                                <a href={`/#/edit-vendor/${vendor._id}`} className="btn btn-primary btn-sm me-2">
-                                    Edit
-                                </a>
-                                <button className="btn btn-danger btn-sm">Delete</button>
-                            </CTableDataCell>
-                        </CTableRow>
-                    ))}
-                </CTableBody>
-            </CTable>
+    try {
+      await api.delete(`/bills/vendors/${selectedVendorId}`); // Delete the vendor
+      toast.success('Vendor deleted successfully!'); // Show success toast
+      fetchVendors(currentPage); // Refresh the vendor list
+    } catch (error) {
+      console.error('Error deleting vendor:', error);
+      toast.error('Failed to delete vendor!'); // Show error toast
+    } finally {
+      setShowModal(false); // Hide the modal
+      setSelectedVendorId(null); // Reset the selected vendor ID
+    }
+  };
 
-            {/* Pagination Component */}
-            <Pagination
-                totalPages={pagination.totalPages || 1}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-            />
-        </div>
-    );
+  return (
+    <div>
+      <SpinnerOverlay isLoading={loading} />
+
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <input
+          type="text"
+          className="form-control w-50"
+          placeholder="Search vendors..."
+          value={searchQuery}
+          onChange={handleSearch}
+        />
+        <a href="/#/add-vendor" className="btn btn-primary">
+          + Service Providor
+        </a>
+      </div>
+
+      <CTable bordered>
+        <CTableHead>
+          <CTableRow>
+            <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Vendor Name</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Category</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {filteredVendors.map((vendor, index) => (
+            <CTableRow key={vendor._id}>
+              <CTableHeaderCell scope="row">
+                {pagination.limit * (currentPage - 1) + index + 1}
+              </CTableHeaderCell>
+              <CTableDataCell>{vendor.provider_name ?? ''}</CTableDataCell>
+              <CTableDataCell>{vendor.bill_category.name ?? ''}</CTableDataCell>
+              <CTableDataCell>
+                <a href={`/#/edit-vendor/${vendor._id}`} className="btn btn-primary btn-sm me-2">
+                  Edit
+                </a>
+                <CButton color="danger" size="sm" onClick={() => handleDeleteClick(vendor._id)}>
+                  Delete
+                </CButton>
+              </CTableDataCell>
+            </CTableRow>
+          ))}
+        </CTableBody>
+      </CTable>
+
+      {/* Pagination Component */}
+      <Pagination
+        totalPages={pagination.totalPages || 1}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        onConfirm={handleDeleteConfirm}
+        message="Do you really want to delete this vendor?"
+      />
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000} // Auto close after 3 seconds
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </div>
+  );
 };
 
 export default Vendors;

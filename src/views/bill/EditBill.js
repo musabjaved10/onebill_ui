@@ -563,7 +563,7 @@ const EditBill = () => {
                         </div>
                         <div className="mb-3">
                             <CFormLabel htmlFor="s_p_address_line_2">Service Provider Address Line 2</CFormLabel>
-                            <CFormInput type="text" id="s_p_address_line_2" value={billData.s_p_address_line_2 ?? ''} required onChange={handleInputChange} />
+                            <CFormInput type="text" id="s_p_address_line_2" value={billData.s_p_address_line_2 ?? ''} onChange={handleInputChange} />
                         </div>
                         <div className="mb-3">
                             <CFormLabel htmlFor="s_p_country">Service Provider Country</CFormLabel>

@@ -22,11 +22,39 @@ const AddVendor = () => {
     const [categories, setCategories] = useState([]);
 
 
+    // const fetchCategories = async () => {
+    //     try {
+    //         setLoading(true); // Show spinner
+    //         const response = await api.get(`/bills/categories`);
+    //         setCategories(response.data.data.categories);
+    //     } catch (error) {
+    //         console.error('Error fetching categories:', error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const fetchCategories = async () => {
+        let allCategories = [];
+        let page = 1;
+        let hasMore = true;
+
         try {
             setLoading(true); // Show spinner
-            const response = await api.get(`/bills/categories`);
-            setCategories(response.data.data.categories);
+
+            while (hasMore) {
+                const response = await api.get(`/bills/categories?page=${page}`);
+                const categories = response.data.data.categories;
+
+                if (categories.length > 0) {
+                    allCategories = allCategories.concat(categories);
+                    page++;
+                } else {
+                    hasMore = false;
+                }
+            }
+
+            setCategories(allCategories);
         } catch (error) {
             console.error('Error fetching categories:', error);
         } finally {
@@ -34,9 +62,9 @@ const AddVendor = () => {
         }
     };
 
-     useEffect(() => {
-            fetchCategories();
-        }, []);
+    useEffect(() => {
+        fetchCategories();
+    }, []);
 
 
     // Handle input change
@@ -122,7 +150,7 @@ const AddVendor = () => {
 
             <CCard className='card-dark-mode'>
                 <CCardHeader className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0">Add Vendor</h5>
+                    <h5 className="mb-0">Add Service Providor</h5>
                     <CButton color="secondary" size="sm" onClick={handleBack}>Back</CButton>
                 </CCardHeader>
                 <CCardBody>
@@ -145,22 +173,22 @@ const AddVendor = () => {
                         {/* Bill Category Dropdown */}
                         <div className="mb-3">
                             <CFormLabel htmlFor="bill_category">Bill Category</CFormLabel>
-                            <CFormSelect
-                                id="bill_category"
-                                value={vendorData.bill_category}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select category</option>
-                                {/* <option value="671a300475f8ba0fc198fd2c">Electricity</option>
-                                <option value="671a305675f8ba0fc198fd33">Gas</option> */}
-                                {categories.map((category) => (
-                                    <option key={category._id} value={category._id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                                {/* Add more options as needed */}
-                            </CFormSelect>
+                            <div className="scrollable-select">
+                                <CFormSelect
+                                    id="bill_category"
+                                    value={vendorData.bill_category}
+                                    onChange={handleChange}
+                                    required
+                                    size={10} // Show multiple options at once
+                                >
+                                    <option value="">Select category</option>
+                                    {categories.map((category) => (
+                                        <option key={category._id} value={category._id}>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </CFormSelect>
+                            </div>
                         </div>
 
                         <div className="mb-3">
@@ -171,7 +199,7 @@ const AddVendor = () => {
                                 placeholder="Enter web url"
                                 value={vendorData.vendor_url}
                                 onChange={handleChange}
-                                // required
+                            // required
                             />
                         </div>
 

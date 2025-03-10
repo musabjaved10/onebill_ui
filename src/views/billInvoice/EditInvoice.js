@@ -2,50 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { CCard, CCardHeader, CCardBody, CCardTitle, CCardText, CButton, CForm, CFormLabel, CFormInput, CFormSelect, CFormTextarea } from '@coreui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Select from 'react-select';
-// import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import api from '../../api/apiWrapper';
 import SpinnerOverlay from '../../components/SpinnerOverlay';
 import "react-datepicker/dist/react-datepicker.css";
 
 const EditInvoice = () => {
-
     const { id } = useParams();
     const navigate = useNavigate();
 
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [bills, setBills] = useState([]);
     const [accounts, setAccounts] = useState([]);
+    const [vendors, setVendors] = useState([]);
 
-
-    const fetchAllAccounts = async (page = 1, allAccounts = []) => {
-        try {
-            setLoading(true); // Show spinner
-
-            // API Call with pagination
-            const response = await api.get(`/bills/accounts`);
-
-            const { accounts: currentAccounts, pagination } = response.data.data;
-            const updatedAccounts = [...allAccounts, ...currentAccounts];
-
-            if (page < pagination.totalPages) {
-                // If more pages are available, fetch next page
-                return fetchAllAccounts(page + 1, updatedAccounts);
-            } else {
-                // console.log("Response:", updatedAccounts);
-
-                // All data fetched
-                setAccounts(updatedAccounts);
-                setLoading(false); // Hide spinner
-                return updatedAccounts;
-            }
-        } catch (error) {
-            console.error("Error fetching accounts:", error);
-            setLoading(false); // Hide spinner
-        }
-    };
     const [billInvoice, setBillInvoice] = useState({
         bill_account: '',
         month: '',
@@ -58,41 +29,66 @@ const EditInvoice = () => {
         payment_date: '',
         bill_category: '',
         bill_vendor: '',
+        status: '',
     });
 
     useEffect(() => {
         const fetchInvoiceData = async () => {
             try {
                 setLoading(true);
-                const response = await api.get(`/bills/invoices/${id}`); // API call with user ID
-                const data = response.data.data; // Assuming API returns `data` object
-                console.log('response: ', data)
+                const response = await api.get(`/bills/invoices/${id}`);
+                const data = response.data.data.invoice;
                 setBillInvoice({
-                    bill_account: data?.bill_account?.account_number ?? '',
+                    ...billInvoice,
+                    bill_account: data?.bill_account?.account_number ?? '', // Ensure this is set correctly
                     month: data.month ?? '',
                     amount: data.amount ?? '',
                     year: data.year ?? '',
-                    due_date: data.due_date ?? '',
+                    due_date: data.due_date ? new Date(data.due_date) : '',
                     late_fees: data.late_fee ?? '',
                     notes: data.notes ?? '',
                     status: data.status ?? '',
                     amount_paid: data?.payment_info?.amount_paid ?? '',
-                    payment_date: data?.payment_info?.payment_date ?? '',
+                    payment_date: data?.payment_info?.payment_date ? new Date(data.payment_info.payment_date) : '',
                     bill_category: data?.bill_account?.bill_category?.name ?? '',
                     bill_vendor: data?.bill_account?.bill_vendor?.provider_name ?? '',
                 });
             } catch (err) {
                 setError('Failed to load invoice data.');
             } finally {
-                setLoading(false); // Hide spinner
+                setLoading(false);
             }
         };
-        // console.log(invoiceData)
+
+        const fetchAllAccounts = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get(`/bills/accounts`);
+                setAccounts(response.data.data.accounts);
+            } catch (error) {
+                console.error("Error fetching accounts:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const fetchAllVendors = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get(`/bills/vendors`);
+                setVendors(response.data.data.vendors);
+            } catch (error) {
+                console.error("Error fetching vendors:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchInvoiceData();
-        fetchAllAccounts(); // Fetch all accounts on mount
+        fetchAllAccounts();
+        fetchAllVendors();
     }, [id]);
 
-    // Handle input change
     const handleChange = (e) => {
         const { id, value } = e.target;
         setBillInvoice((prevData) => ({
@@ -101,7 +97,6 @@ const EditInvoice = () => {
         }));
     };
 
-
     const handleDropdownChange = (selectedOption) => {
         setBillInvoice((prevData) => ({
             ...prevData,
@@ -109,49 +104,60 @@ const EditInvoice = () => {
         }));
     };
 
-    // Handle form submission
+    const handleVendorChange = (selectedOption) => {
+        setBillInvoice((prevData) => ({
+            ...prevData,
+            bill_vendor: selectedOption ? selectedOption.value : '',
+        }));
+    };
+
+    const handleDateChange = (date, field) => {
+        setBillInvoice((prevData) => ({
+            ...prevData,
+            [field]: date,
+        }));
+    };
+
+    const handleStatusChange = (e) => {
+        const { value } = e.target;
+        setBillInvoice((prevData) => ({
+            ...prevData,
+            status: value,
+        }));
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        console.log('post:', billInvoice)
         const postData = {
-            // bill_account: billInvoice.bill_account,
             month: billInvoice.month,
             year: billInvoice.year,
-            amount: parseFloat(billInvoice.amount), // Ensure the amount is a number
-            due_date: (billInvoice.due_date instanceof Date)
-                ? billInvoice.due_date.toISOString().split('T')[0] // Format date to 'yyyy-mm-dd'
-                : billInvoice.due_date ? new Date(billInvoice.due_date).toISOString().split('T')[0] : '', // Convert to Date if string
-            late_fee: parseFloat(billInvoice.late_fees), // Ensure late fees are numbers
+            amount: parseFloat(billInvoice.amount),
+            due_date: billInvoice.due_date.toISOString().split('T')[0],
+            late_fee: parseFloat(billInvoice.late_fees),
             notes: billInvoice.notes,
             amount_paid: billInvoice.amount_paid,
-            payment_date: billInvoice.payment_date,
+            payment_date: billInvoice.payment_date.toISOString().split('T')[0],
             status: billInvoice.status,
         };
 
-        console.log(postData);
-
-
         try {
-            setLoading(true); // Start loading state
+            setLoading(true);
             const response = await api.put(`/bills/invoices/${id}`, postData);
-            //   await api.put(`/users/${id}`, updatedData); // Update user data via API
-
-
-            // Check for success or failure
             if (response.data.success) {
                 setSuccess('Invoice updated successfully!');
                 setTimeout(() => {
-                    navigate(-1); // Redirect to the invoices list page after success
+                    navigate(-1);
                 }, 2000);
             }
         } catch (error) {
             console.error('Error posting data:', error);
-            setError('Failed to create invoice.');
+            setError('Failed to update invoice.');
         } finally {
-            setLoading(false); // Hide loading spinner
+            setLoading(false);
         }
     };
-
 
     const handleBack = () => {
         navigate(-1);
@@ -162,22 +168,20 @@ const EditInvoice = () => {
         label: `${account.account_number} - ${account.first_name_on_bill} ${account.last_name_on_bill}`,
     }));
 
+    const vendorOptions = vendors.map((vendor) => ({
+        value: vendor._id,
+        label: vendor.provider_name,
+    }));
+
     const months = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
 
-    const handleDateChange = (date) => {
-        setBillInvoice((prevData) => ({
-            ...prevData,
-            due_date: date,
-        }));
-    };
-
     const customStyles = {
         option: (provided, state) => ({
             ...provided,
-            color: "black", // Set the text color to black for all options
+            color: "black",
             backgroundColor: state.isSelected ? "#e0e0e0" : "white",
             "&:hover": {
                 backgroundColor: "#f0f0f0",
@@ -185,24 +189,16 @@ const EditInvoice = () => {
         }),
         control: (provided) => ({
             ...provided,
-            backgroundColor: "white", // Set the background color of the control
+            backgroundColor: "white",
         }),
         singleValue: (provided) => ({
             ...provided,
-            color: "black", // Set the color of the selected value
+            color: "black",
         }),
         input: (provided) => ({
             ...provided,
-            color: "black", // Set the color of the input text
+            color: "black",
         }),
-    }
-
-    const handleStatusChange = (e) => {
-        const { value } = e.target;
-        setUserData((prevState) => ({
-            ...prevState,
-            status: value,
-        }));
     };
 
     return (
@@ -218,14 +214,12 @@ const EditInvoice = () => {
                     {error && <div className="alert alert-danger">{error}</div>}
                     {success && <div className="alert alert-success">{success}</div>}
                     <CForm onSubmit={handleSubmit}>
-
-
                         <div className="mb-3">
                             <label htmlFor="bill_account" className="form-label">Bill Account</label>
                             <Select
                                 options={accountOptions}
                                 onChange={handleDropdownChange}
-                                value={billInvoice.bill_account}
+                                value={accountOptions.find(option => option.value === billInvoice.bill_account) || null}
                                 placeholder="Search or select a bill account"
                                 isClearable
                                 isSearchable
@@ -234,7 +228,7 @@ const EditInvoice = () => {
                         </div>
 
                         <div className="mb-3">
-                            <CFormLabel htmlFor="month">Bill Category</CFormLabel>
+                            <CFormLabel htmlFor="month">Bill Month</CFormLabel>
                             <CFormSelect
                                 id="month"
                                 value={billInvoice.month}
@@ -251,17 +245,24 @@ const EditInvoice = () => {
 
                         <div className="mb-3">
                             <CFormLabel htmlFor="year">Year</CFormLabel>
-                            <CFormInput
-                                type="text"
+                            <CFormSelect
                                 id="year"
-                                placeholder="Enter Year"
                                 value={billInvoice.year}
                                 onChange={handleChange}
                                 required
-                            // value={userData.first_name}
-
-                            />
+                            >
+                                <option value="">Select Year</option>
+                                {Array.from({ length: 10 }, (_, i) => {
+                                    const year = new Date().getFullYear() - i;
+                                    return (
+                                        <option key={year} value={year}>
+                                            {year}
+                                        </option>
+                                    );
+                                })}
+                            </CFormSelect>
                         </div>
+
                         <div className="mb-3">
                             <CFormLabel htmlFor="amount">Amount</CFormLabel>
                             <CFormInput
@@ -276,13 +277,15 @@ const EditInvoice = () => {
 
                         <div className="mb-3">
                             <CFormLabel htmlFor="due_date">Select Due Date</CFormLabel>
-                            <DatePicker
-                                selected={billInvoice.due_date}
-                                onChange={handleDateChange}
-                                dateFormat="yyyy-MM-dd"
-                                className="form-control w-full datepicker-input"
-                                id="due_date"
-                            />
+                            <div className="w-full">
+                                <DatePicker
+                                    selected={billInvoice.due_date}
+                                    onChange={(date) => handleDateChange(date, 'due_date')}
+                                    dateFormat="yyyy-MM-dd"
+                                    className="form-control w-full datepicker-input"
+                                    id="due_date"
+                                />
+                            </div>
                         </div>
 
                         <div className="mb-3">
@@ -302,23 +305,26 @@ const EditInvoice = () => {
                             <CFormInput
                                 type="text"
                                 id="amount_paid"
-                                placeholder="Enter Late Fees"
+                                placeholder="Enter Amount Paid"
                                 value={billInvoice.amount_paid}
                                 onChange={handleChange}
-
                             />
                         </div>
 
                         <div className="mb-3">
                             <CFormLabel htmlFor="payment_date">Payment Date</CFormLabel>
-                            <CFormInput
-                                type="text"
-                                id="payment_date"
-                                placeholder="Enter Late Fees"
-                                value={billInvoice.payment_date}
-                                onChange={handleChange}
-
-                            />
+                            <div className="w-full">
+                                <DatePicker
+                                    selected={billInvoice.payment_date}
+                                    onChange={(date) => handleDateChange(date, 'payment_date')}
+                                    dateFormat="yyyy-MM-dd"
+                                    className="form-control w-full datepicker-input"
+                                    id="payment_date"
+                                    isClearable // Allow clearing the date
+                                    placeholderText="Select Payment Date" // Add a placeholder
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <div className="mb-3">
@@ -326,22 +332,22 @@ const EditInvoice = () => {
                             <CFormInput
                                 type="text"
                                 id="bill_category"
-                                placeholder="Enter Late Fees"
+                                placeholder="Enter Bill Category"
                                 value={billInvoice.bill_category}
                                 onChange={handleChange}
-
                             />
                         </div>
 
                         <div className="mb-3">
                             <CFormLabel htmlFor="bill_vendor">Bill Vendor</CFormLabel>
-                            <CFormInput
-                                type="text"
-                                id="bill_vendor"
-                                placeholder="Enter Late Fees"
-                                value={billInvoice.bill_vendor}
-                                onChange={handleChange}
-
+                            <Select
+                                options={vendorOptions}
+                                onChange={handleVendorChange}
+                                value={vendorOptions.find(option => option.value === billInvoice.bill_vendor)}
+                                placeholder="Search or select a bill vendor"
+                                isClearable
+                                isSearchable
+                                styles={customStyles}
                             />
                         </div>
 
@@ -356,6 +362,7 @@ const EditInvoice = () => {
                                 required
                             />
                         </div>
+
                         <div className="mb-3">
                             <CFormLabel htmlFor="status">Status</CFormLabel>
                             <CFormSelect
@@ -368,7 +375,6 @@ const EditInvoice = () => {
                                 <option value="overdue">Overdue</option>
                             </CFormSelect>
                         </div>
-
 
                         <CButton type="submit" color="primary">Submit</CButton>
                     </CForm>
