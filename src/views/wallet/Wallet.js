@@ -80,7 +80,7 @@ const UserWallet = () => {
               <CTableDataCell className="text-center">
                 {/* <a href={`/#/edit-wallet/${userWallet._id}`} className="me-2"><i className="bi bi-pencil-square"></i></a> */}
                 <a href={`/#/view-wallet/${userWallet._id}`} className="text-secondary me-2">
-                  <i class="bi bi-eye"></i>
+                  <i className="bi bi-eye"></i>
                 </a>
                 {/* <a href="#" class="text-danger">
                   <i class="bi bi-trash3-fill"></i>
