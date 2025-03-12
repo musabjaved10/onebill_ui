@@ -19,6 +19,7 @@ const ViewUserWallet = React.lazy(() => import('./views/wallet/ViewWallet.js'))
 const BillInvoice = React.lazy(() => import('./views/billInvoice/index.js'))
 const CreateInvoice = React.lazy(() => import('./views/billInvoice/create.js'))
 const EditInvoice = React.lazy(() => import('./views/billInvoice/EditInvoice.js'))
+const ViewInvoice = React.lazy(() => import('./views/billInvoice/ViewInvoice.js'))
 
 
 
@@ -98,6 +99,7 @@ const routes = [
   { path: '/bill-invoice', name: 'BillInvoice', element: BillInvoice },
   { path: '/create-invoice', name: 'CreateInvoice', element: CreateInvoice },
   { path: '/edit-invoice/:id', name: 'EditInvoice', element: EditInvoice },
+  { path: '/view-invoice/:id', name: 'ViewInvoice', element: ViewInvoice },
 
 
 

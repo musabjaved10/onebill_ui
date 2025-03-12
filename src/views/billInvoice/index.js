@@ -136,7 +136,10 @@ const Bills = () => {
                                 <a href={`/#/edit-invoice/${billInvoice._id}`} className="btn btn-primary btn-sm me-2">
                                     Edit
                                 </a>
-                                <button className="btn btn-secondary btn-sm">View</button>
+                                {/* <a href={`/#/view-invoice/${billInvoice._id}`} className="btn btn-secondary btn-sm me-2">
+                                    View
+                                </a> */}
+                                {/* <button className="btn btn-secondary btn-sm">View</button> */}
                                 <CButton color="danger" size="sm" onClick={() => handleDeleteClick(billInvoice._id)}>
                                     Delete
                                 </CButton>
