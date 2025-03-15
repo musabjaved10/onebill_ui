@@ -3,6 +3,7 @@ import React from 'react'
 const User = React.lazy(() => import('./views/users/AllUsers'))
 const EditUser = React.lazy(() => import('./views/users/EditUser'))
 const UserSummary = React.lazy(() => import('./views/users/UserSummary'))
+const UserBills = React.lazy(() => import('./views/users/UserBills'))
 const Categories = React.lazy(() => import('./views/category/Categories.js'))
 const AddCategory = React.lazy(() => import('./views/category/AddCategory.js'))
 const EditCategory = React.lazy(() => import('./views/category/EditCategory.js'))
@@ -83,6 +84,7 @@ const routes = [
   { path: '/user', name: 'User', element: User },
   { path: '/edit-user/:id', name: 'EditUser', element: EditUser },
   { path: '/user-summary/:id', name: 'UserSummary', element: UserSummary },
+  { path: '/user-bills/:id', name: 'UserBills', element: UserBills },
   { path: '/category', name: 'Categories', element: Categories },
   { path: '/add-category', name: 'AddCategory', element: AddCategory },
   { path: '/edit-category/:id', name: 'EditCategory', element: EditCategory },

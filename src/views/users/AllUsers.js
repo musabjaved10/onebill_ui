@@ -99,6 +99,9 @@ const AllUsers = () => {
                 <a href={`/#/user-summary/${user._id}`} className="btn btn-secondary btn-sm me-2">
                   Summary
                 </a>
+                <a href={`/#/user-bills/${user._id}`} className="btn btn-secondary btn-sm me-2">
+                  Bills
+                </a>
                 <a href={`/#/edit-user/${user._id}`} className="btn btn-primary btn-sm me-2">
                   Edit
                 </a>
