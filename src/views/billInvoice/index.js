@@ -3,12 +3,13 @@ import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableData
 import SpinnerOverlay from '../../components/SpinnerOverlay';
 import Pagination from '../../components/Pagination';
 import api from '../../api/apiWrapper';
-import { toast, ToastContainer } from 'react-toastify'; // Import toast and ToastContainer
-import ConfirmationModal from '../../components/ConfirmationModal'; // Adjust the path as per your project structure
+import { toast, ToastContainer } from 'react-toastify';
+import ConfirmationModal from '../../components/ConfirmationModal';
+import { format } from 'date-fns';
 
 const Bills = () => {
     const [billInvoices, setBillInvoices] = useState([]);
-    const [filteredBills, setFilteredBills] = useState([]); // State for filtered bills
+    const [filteredBills, setFilteredBills] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
@@ -18,17 +19,17 @@ const Bills = () => {
 
     const fetchBills = async (page = 1) => {
         try {
-            setLoading(true); // Show spinner
-            const response = await api.get(`/bills/invoices`);
+            setLoading(true);
+            const response = await api.get(`/bills/invoices?page=${page}&sort=-createdAt`);
             console.log('data is', response.data);
 
-            const billInvoice = response.data.data.invoices;
-            setBillInvoices(billInvoice); // Set bills
-            setFilteredBills(billInvoice); // Initialize filteredBills with billInvoices
-            setPagination(response.data.data.pagination); // Set pagination info
+            const invoices = response.data.data.invoices;
+            setBillInvoices(invoices);
+            setFilteredBills(invoices);
+            setPagination(response.data.data.pagination);
         } catch (error) {
             console.error('Error fetching bills:', error);
-            toast.error('Failed to fetch bill invoices!'); // Show error toast
+            toast.error('Failed to fetch bill invoices!');
         } finally {
             setLoading(false);
         }
@@ -39,7 +40,7 @@ const Bills = () => {
     }, [currentPage]);
 
     useEffect(() => {
-        setFilteredBills(billInvoices); // Update filteredBills when billInvoices changes
+        setFilteredBills(billInvoices);
     }, [billInvoices]);
 
     const handlePageChange = (page) => {
@@ -50,38 +51,37 @@ const Bills = () => {
         const value = e.target.value.toLowerCase();
         setSearchTerm(value);
 
-        // Filter bills based on the search term
         const filtered = billInvoices.filter((billInvoice) =>
             (billInvoice.bill_account?.account_number ?? '').toLowerCase().includes(value) ||
             (billInvoice.bill_account?.bill_category?.name ?? '').toLowerCase().includes(value) ||
             (billInvoice.bill_account?.bill_vendor?.provider_name ?? '').toLowerCase().includes(value) ||
-            (billInvoice.amount?.toString() ?? '').includes(value) || // Convert amount to string
+            (billInvoice.amount?.toString() ?? '').includes(value) ||
             (billInvoice.month ?? '').toLowerCase().includes(value) ||
-            (billInvoice.year?.toString() ?? '').includes(value) || // Convert year to string
+            (billInvoice.year?.toString() ?? '').includes(value) ||
             (billInvoice.status ?? '').toLowerCase().includes(value)
         );
 
-        setFilteredBills(filtered); // Update filteredBills state
+        setFilteredBills(filtered);
     };
 
     const handleDeleteClick = (invoiceId) => {
-        setSelectedInvoiceId(invoiceId); // Set the selected invoice ID
-        setShowModal(true); // Show the confirmation modal
+        setSelectedInvoiceId(invoiceId);
+        setShowModal(true);
     };
 
     const handleDeleteConfirm = async () => {
         if (!selectedInvoiceId) return;
 
         try {
-            await api.delete(`/bills/invoices/${selectedInvoiceId}`); // Delete the invoice
-            toast.success('Invoice deleted successfully!'); // Show success toast
-            fetchBills(currentPage); // Refresh the invoice list
+            await api.delete(`/bills/invoices/${selectedInvoiceId}`);
+            toast.success('Invoice deleted successfully!');
+            fetchBills(currentPage);
         } catch (error) {
             console.error('Error deleting invoice:', error);
-            toast.error('Failed to delete invoice!'); // Show error toast
+            toast.error('Failed to delete invoice!');
         } finally {
-            setShowModal(false); // Hide the modal
-            setSelectedInvoiceId(null); // Reset the selected invoice ID
+            setShowModal(false);
+            setSelectedInvoiceId(null);
         }
     };
 
@@ -100,7 +100,11 @@ const Bills = () => {
                 <a href="/#/create-invoice" className="btn btn-primary">Create Invoice</a>
             </div>
 
-            <CTable bordered>
+            <div className="mb-2">
+                Showing {filteredBills.length} of {pagination.totalInvoices || 0} invoices
+            </div>
+
+            <CTable bordered responsive>
                 <CTableHead>
                     <CTableRow>
                         <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
@@ -109,6 +113,7 @@ const Bills = () => {
                         <CTableHeaderCell scope="col">Provider Name</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Month / Year</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Created At</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Status</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Action</CTableHeaderCell>
                     </CTableRow>
@@ -122,52 +127,47 @@ const Bills = () => {
                             <CTableDataCell>{billInvoice.bill_account?.account_number ?? 'N/A'}</CTableDataCell>
                             <CTableDataCell>{billInvoice.bill_account?.bill_category?.name ?? 'N/A'}</CTableDataCell>
                             <CTableDataCell>{billInvoice.bill_account?.bill_vendor?.provider_name ?? 'N/A'}</CTableDataCell>
-                            <CTableDataCell>{"$" + (billInvoice.amount ?? 'N/A')}</CTableDataCell>
-                            <CTableDataCell>{(billInvoice.month ?? 'N/A') + "-" + (billInvoice.year ?? 'N/A')}</CTableDataCell>
+                            <CTableDataCell>{"$" + (billInvoice.amount?.toFixed(2) ?? 'N/A')}</CTableDataCell>
+                            <CTableDataCell>{(billInvoice.month ?? 'N/A') + " / " + (billInvoice.year ?? 'N/A')}</CTableDataCell>
                             <CTableDataCell>
-                                <span
-                                    className={`badge ${billInvoice.status === 'paid' ? 'bg-success' : 'bg-warning'
-                                        }`}
-                                >
-                                    {billInvoice.status === 'paid' ? 'Paid' : 'Not Paid'}
+                                {billInvoice.createdAt ? format(new Date(billInvoice.createdAt), 'MMM dd, yyyy HH:mm') : 'N/A'}
+                            </CTableDataCell>
+                            <CTableDataCell>
+                                <span className={`badge ${billInvoice.status === 'paid' ? 'bg-success' : 'bg-warning'}`}>
+                                    {billInvoice.status === 'paid' ? 'Paid' : 'Pending'}
                                 </span>
                             </CTableDataCell>
                             <CTableDataCell>
-                                <a href={`/#/edit-invoice/${billInvoice._id}`} className="btn btn-primary btn-sm me-2">
-                                    Edit
-                                </a>
-                                {/* <a href={`/#/view-invoice/${billInvoice._id}`} className="btn btn-secondary btn-sm me-2">
-                                    View
-                                </a> */}
-                                {/* <button className="btn btn-secondary btn-sm">View</button> */}
-                                <CButton color="danger" size="sm" onClick={() => handleDeleteClick(billInvoice._id)}>
-                                    Delete
-                                </CButton>
+                                <div className="d-flex gap-2">
+                                    <a href={`/#/edit-invoice/${billInvoice._id}`} className="btn btn-primary btn-sm">
+                                        Edit
+                                    </a>
+                                    <CButton color="danger" size="sm" onClick={() => handleDeleteClick(billInvoice._id)}>
+                                        Delete
+                                    </CButton>
+                                </div>
                             </CTableDataCell>
                         </CTableRow>
                     ))}
                 </CTableBody>
             </CTable>
 
-            {/* Pagination Component */}
             <Pagination
                 totalPages={pagination.totalPages || 1}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
             />
 
-            {/* Confirmation Modal */}
             <ConfirmationModal
                 show={showModal}
                 onHide={() => setShowModal(false)}
                 onConfirm={handleDeleteConfirm}
-                message="Do you really want to delete this invoice?"
+                message="Are you sure you want to delete this invoice?"
             />
 
-            {/* Toast Container */}
             <ToastContainer
                 position="top-right"
-                autoClose={3000} // Auto close after 3 seconds
+                autoClose={3000}
                 hideProgressBar={false}
                 newestOnTop
                 closeOnClick

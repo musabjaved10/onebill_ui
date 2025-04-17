@@ -34,6 +34,7 @@ const Dashboard = () => {
             setLoading(true);
             const billData = await api.get(`/bills/accounts?status=pending&page=${page}`);
             setBills(billData.data.data.accounts || []);
+            console.log(billData.data.data)
             setPagination(billData.data.data.pagination);
         } catch (err) {
             console.error('Error fetching bill data:', err);

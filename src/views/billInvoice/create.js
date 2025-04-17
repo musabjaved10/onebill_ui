@@ -185,7 +185,7 @@ const CreateInvoice = () => {
                         </div>
 
                         <div className="mb-3">
-                            <CFormLabel htmlFor="month">Bill Category</CFormLabel>
+                            <CFormLabel htmlFor="month">Month</CFormLabel>
                             <CFormSelect
                                 id="month"
                                 value={billInvoice.month}
@@ -254,7 +254,7 @@ const CreateInvoice = () => {
                                 rows="4"
                                 value={billInvoice.notes}
                                 onChange={handleChange}
-                                required
+
                             />
                         </div>
 

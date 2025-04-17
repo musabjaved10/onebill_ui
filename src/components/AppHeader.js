@@ -14,6 +14,8 @@ import {
   CNavLink,
   CNavItem,
   useColorModes,
+  CAvatar,
+
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
@@ -28,6 +30,8 @@ import {
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
+import userIcon from './../assets/images/avatars/user.png'
+
 
 const AppHeader = () => {
   // navigate("/#/login");
@@ -159,7 +163,9 @@ const AppHeader = () => {
           {isLoggedIn ? (
             // <AppHeaderDropdown />
             <>
-              <AppHeaderDropdown />
+              {/* <AppHeaderDropdown /> */}
+                      <CAvatar src={userIcon} size="md" />
+              
               <li className="nav-item py-1">
                 <CNavItem>
                   <CNavLink href="#" onClick={handleLogout}>
