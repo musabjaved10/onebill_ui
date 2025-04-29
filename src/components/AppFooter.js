@@ -11,7 +11,7 @@ const AppFooter = () => {
         <span className="ms-1">&copy; 2024 creativeLabs.</span>
       </div> */}
       <div className="ms-auto">
-        <span className="me-1">Powered by: One Bill Pay</span>
+        <span className="me-1">Powered by: Upayonce</span>
       </div>
     </CFooter>
   )
