@@ -128,8 +128,8 @@ const EditInvoice = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        console.log('post:', billInvoice)
+    
+        console.log('post:', billInvoice);
         const postData = {
             month: billInvoice.month,
             year: billInvoice.year,
@@ -141,23 +141,34 @@ const EditInvoice = () => {
             payment_date: billInvoice.payment_date.toISOString().split('T')[0],
             status: billInvoice.status,
         };
-
+    
         try {
             setLoading(true);
             const response = await api.put(`/bills/invoices/${id}`, postData);
+    
             if (response.data.success) {
-                setSuccess('Invoice updated successfully!');
-                setTimeout(() => {
-                    navigate(-1);
-                }, 2000);
+                // First API success → hit second API
+                const paymentResponse = await api.post(`/bills/invoices/${id}/record-payment`, {
+                    mode_of_payment: 'Bank Transfer',
+                });
+    
+                if (paymentResponse.data.success) {
+                    setSuccess('Invoice updated and payment recorded successfully!');
+                    setTimeout(() => {
+                        navigate(-1);
+                    }, 2000);
+                } else {
+                    setError('Invoice updated, but failed to record payment.');
+                }
             }
         } catch (error) {
             console.error('Error posting data:', error);
-            setError('Failed to update invoice.');
+            setError('Failed to update invoice or record payment.');
         } finally {
             setLoading(false);
         }
     };
+    
 
     const handleBack = () => {
         navigate(-1);

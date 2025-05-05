@@ -17,6 +17,8 @@ import ConfirmationModal from '../../components/ConfirmationModal'; // Adjust th
 
 const AllUserBills = () => {
     const { id } = useParams();
+      const navigate = useNavigate();
+    
 
     const [userbills, serUserBills] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -28,10 +30,10 @@ const AllUserBills = () => {
     const fetchUsers = async (page = 1) => {
         try {
             setLoading(true); // Show spinner
-            const response = await api.get(`/bills/invoices/user/${id}?page=${page}`);
+            const response = await api.get(`/bills/accounts/user/${id}?page=${page}`);
             console.log('data is', response);
 
-            serUserBills(response.data.data.invoices); // Set users
+            serUserBills(response.data.data.accounts); // Set users
             setPagination(response.data.data.pagination); // Set pagination info
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -70,20 +72,27 @@ const AllUserBills = () => {
     //     }
     // };
 
+    const handleBack = () => {
+        navigate(-1); // Navigate back to the previous page
+    };
+
     return (
         <div>
             <SpinnerOverlay isLoading={loading} />
+            <CButton color="secondary" size="sm" onClick={handleBack}>Back</CButton>
+
             <CTable bordered>
                 <CTableHead>
                     <CTableRow>
                         <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
+                        <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Name</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Bill Category</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Bill Vendor</CTableHeaderCell>
                         <CTableHeaderCell scope="col">Month/Year</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Amount Paid</CTableHeaderCell>
-                        <CTableHeaderCell scope="col">Mode Of Payment</CTableHeaderCell>
+                        {/* <CTableHeaderCell scope="col">Amount</CTableHeaderCell> */}
+                        {/* <CTableHeaderCell scope="col">Amount Paid</CTableHeaderCell> */}
+                        {/* <CTableHeaderCell scope="col">Mode Of Payment</CTableHeaderCell> */}
                         <CTableHeaderCell scope="col">Status</CTableHeaderCell>
                         {/* <CTableHeaderCell scope="col">Action</CTableHeaderCell> */}
                     </CTableRow>
@@ -94,16 +103,17 @@ const AllUserBills = () => {
                             <CTableHeaderCell scope="row">
                                 {pagination.limit * (currentPage - 1) + index + 1}
                             </CTableHeaderCell>
-                            <CTableDataCell>{bill.added_by?.first_name + ' ' + bill.added_by?.last_name}</CTableDataCell>
-                            <CTableDataCell>{bill.bill_account?.bill_category?.name ?? '' }</CTableDataCell>
-                            <CTableDataCell>{bill.bill_account?.bill_vendor?.name ?? '' }</CTableDataCell>
-                            <CTableDataCell>{bill.month + ' ' + bill.year || 'N/A'}</CTableDataCell>
-                            <CTableDataCell>{bill.amount || 'N/A'}</CTableDataCell>
-                            <CTableDataCell>{bill.payment_info?.amount_paid || 'N/A'}</CTableDataCell>
-                            <CTableDataCell>{bill.payment_info?.mode_of_payment || 'N/A'}</CTableDataCell>
+                            <CTableDataCell>{bill.account_number ?? ''}</CTableDataCell>
+                            <CTableDataCell>{bill.user?.first_name + ' ' + bill.user?.last_name}</CTableDataCell>
+                            <CTableDataCell>{bill.bill_category?.name ?? ''}</CTableDataCell>
+                            <CTableDataCell>{bill?.bill_vendor?.provider_name ?? ''}</CTableDataCell>
+                            <CTableDataCell>{bill.due_date ?? 'N/A'}</CTableDataCell>
+                            {/* <CTableDataCell>{bill.amount || 'N/A'}</CTableDataCell> */}
+                            {/* <CTableDataCell>{bill.payment_info?.amount_paid || 'N/A'}</CTableDataCell> */}
+                            {/* <CTableDataCell>{bill.payment_info?.mode_of_payment || 'N/A'}</CTableDataCell> */}
                             <CTableDataCell>
-                                <span className={`badge ${bill.is_paid == false ? 'bg-warning' : bill.is_paid == true ? 'bg-success' : 'bg-secondary'}`}>
-                                    {bill.is_paid === true ? 'Paid' : 'Not Paid'}
+                                <span className={`badge ${bill.status == "approved" ? 'bg-success' : 'bg-warning' }`}>
+                                    {bill.status == "approved" ? 'Approved' : 'Pending'}
                                 </span>
                             </CTableDataCell>
                             {/* <CTableDataCell>
