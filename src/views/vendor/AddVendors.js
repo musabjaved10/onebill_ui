@@ -42,19 +42,20 @@ const AddVendor = () => {
         try {
             setLoading(true); // Show spinner
 
-            while (hasMore) {
+            // while (hasMore) {
                 const response = await api.get(`/bills/categories?page=${page}`);
+                console.log("response: ",response)
                 const categories = response.data.data.categories;
 
-                if (categories.length > 0) {
-                    allCategories = allCategories.concat(categories);
-                    page++;
-                } else {
-                    hasMore = false;
-                }
-            }
+                // if (categories.length > 0) {
+                //     allCategories = allCategories.concat(categories);
+                //     page++;
+                // } else {
+                //     hasMore = false;
+                // }
+            // }
 
-            setCategories(allCategories);
+            setCategories(categories);
         } catch (error) {
             console.error('Error fetching categories:', error);
         } finally {

@@ -138,7 +138,7 @@ const EditInvoice = () => {
             late_fee: parseFloat(billInvoice.late_fees),
             notes: billInvoice.notes,
             amount_paid: billInvoice.amount_paid,
-            payment_date: billInvoice.payment_date.toISOString().split('T')[0],
+            payment_date: billInvoice.payment_date ? billInvoice.payment_date.toISOString().split('T')[0] : '',
             status: billInvoice.status,
         };
     
@@ -333,7 +333,7 @@ const EditInvoice = () => {
                                     id="payment_date"
                                     isClearable // Allow clearing the date
                                     placeholderText="Select Payment Date" // Add a placeholder
-                                    required
+                                    // required
                                 />
                             </div>
                         </div>
@@ -370,7 +370,6 @@ const EditInvoice = () => {
                                 rows="4"
                                 value={billInvoice.notes}
                                 onChange={handleChange}
-                                required
                             />
                         </div>
 
@@ -383,7 +382,7 @@ const EditInvoice = () => {
                             >
                                 <option value="paid">Paid</option>
                                 <option value="unpaid">Un-Paid</option>
-                                <option value="overdue">Overdue</option>
+                                {/* <option value="overdue">Overdue</option> */}
                             </CFormSelect>
                         </div>
 
