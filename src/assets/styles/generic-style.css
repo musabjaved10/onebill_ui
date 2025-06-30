@@ -1,0 +1,26 @@
+/* .scrollable-select {
+    height: 200px; 
+    overflow-y: auto; 
+    border: 1px solid #ccc;
+    border-radius: 4px;
+} */
+
+.wallet-table,
+.transaction-table
+.invoices-table
+.dark-text-table {
+    color: black !important;
+    /* Force black text */
+}
+
+.wallet-table th,
+.wallet-table td,
+.invoices-table th,
+.invoices-table td,
+.dark-text-table th,
+.dark-text-table td,
+.transaction-table th,
+.transaction-table td {
+    color: black !important;
+    /* Force black text */
+}

@@ -1,387 +1,394 @@
-import React from 'react'
-import classNames from 'classnames'
-
+import React, { useState, useEffect } from 'react'
 import {
-  CAvatar,
-  CButton,
-  CButtonGroup,
-  CCard,
-  CCardBody,
-  CCardFooter,
-  CCardHeader,
-  CCol,
-  CProgress,
-  CRow,
   CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
   CTableBody,
   CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import {
-  cibCcAmex,
-  cibCcApplePay,
-  cibCcMastercard,
-  cibCcPaypal,
-  cibCcStripe,
-  cibCcVisa,
-  cibGoogle,
-  cibFacebook,
-  cibLinkedin,
-  cifBr,
-  cifEs,
-  cifFr,
-  cifIn,
-  cifPl,
-  cifUs,
-  cibTwitter,
-  cilCloudDownload,
-  cilPeople,
-  cilUser,
-  cilUserFemale,
-} from '@coreui/icons'
-
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
-
-import WidgetsBrand from '../widgets/WidgetsBrand'
-import WidgetsDropdown from '../widgets/WidgetsDropdown'
-import MainChart from './MainChart'
+import SpinnerOverlay from '../../components/SpinnerOverlay'
+import api from '../../api/apiWrapper'
+import Pagination from '../../components/Pagination'
+import ConfirmationModal from '../../components/ConfirmationModal'
+import { toast, ToastContainer } from 'react-toastify'
 
 const Dashboard = () => {
-  const progressExample = [
-    { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
-    { title: 'Unique', value: '24.093 Users', percent: 20, color: 'info' },
-    { title: 'Pageviews', value: '78.706 Views', percent: 60, color: 'warning' },
-    { title: 'New Users', value: '22.123 Users', percent: 80, color: 'danger' },
-    { title: 'Bounce Rate', value: 'Average Rate', percent: 40.15, color: 'primary' },
-  ]
+  const [dashboardData, setDashboardData] = useState({}) // Initialize as an empty object
+  const [bills, setBills] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [pagination, setPagination] = useState({})
+  const [currentPage, setCurrentPage] = useState(1)
+  const [showModal, setShowModal] = useState(false)
+  const [selectedBillId, setSelectedBillId] = useState(null)
 
-  const progressGroupExample1 = [
-    { title: 'Monday', value1: 34, value2: 78 },
-    { title: 'Tuesday', value1: 56, value2: 94 },
-    { title: 'Wednesday', value1: 12, value2: 67 },
-    { title: 'Thursday', value1: 43, value2: 91 },
-    { title: 'Friday', value1: 22, value2: 73 },
-    { title: 'Saturday', value1: 53, value2: 82 },
-    { title: 'Sunday', value1: 9, value2: 69 },
-  ]
+  // const fetchDashboardData = async () => {
+  //   try {
+  //     setLoading(true)
+  //     const response = await api.get(`/stats/bills`)
+  //     setDashboardData(response.data.data || {}) // Ensure data is an object
+  //   } catch (err) {
+  //     console.error('Error fetching dashboard data:', err)
+  //     setError('Failed to load dashboard data. Please try again later.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const progressGroupExample2 = [
-    { title: 'Male', icon: cilUser, value: 53 },
-    { title: 'Female', icon: cilUserFemale, value: 43 },
-  ]
+  // Modify your fetch functions with better error handling
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+      const response = await api.get(`/stats/bills`)
 
-  const progressGroupExample3 = [
-    { title: 'Organic Search', icon: cibGoogle, percent: 56, value: '191,235' },
-    { title: 'Facebook', icon: cibFacebook, percent: 15, value: '51,223' },
-    { title: 'Twitter', icon: cibTwitter, percent: 11, value: '37,564' },
-    { title: 'LinkedIn', icon: cibLinkedin, percent: 8, value: '27,319' },
-  ]
+      // More robust data validation
+      if (response?.data?.data) {
+        setDashboardData(response.data.data)
+      } else {
+        setError('Invalid dashboard data format')
+        console.error('Invalid response format:', response)
+      }
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err)
+      setError(err.response?.data?.message || 'Failed to load dashboard data')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const tableExample = [
-    {
-      avatar: { src: avatar1, status: 'success' },
-      user: {
-        name: 'Yiorgos Avraamu',
-        new: true,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'USA', flag: cifUs },
-      usage: {
-        value: 50,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'success',
-      },
-      payment: { name: 'Mastercard', icon: cibCcMastercard },
-      activity: '10 sec ago',
-    },
-    {
-      avatar: { src: avatar2, status: 'danger' },
-      user: {
-        name: 'Avram Tarasios',
-        new: false,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'Brazil', flag: cifBr },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'info',
-      },
-      payment: { name: 'Visa', icon: cibCcVisa },
-      activity: '5 minutes ago',
-    },
-    {
-      avatar: { src: avatar3, status: 'warning' },
-      user: { name: 'Quintin Ed', new: true, registered: 'Jan 1, 2023' },
-      country: { name: 'India', flag: cifIn },
-      usage: {
-        value: 74,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'warning',
-      },
-      payment: { name: 'Stripe', icon: cibCcStripe },
-      activity: '1 hour ago',
-    },
-    {
-      avatar: { src: avatar4, status: 'secondary' },
-      user: { name: 'Enéas Kwadwo', new: true, registered: 'Jan 1, 2023' },
-      country: { name: 'France', flag: cifFr },
-      usage: {
-        value: 98,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'danger',
-      },
-      payment: { name: 'PayPal', icon: cibCcPaypal },
-      activity: 'Last month',
-    },
-    {
-      avatar: { src: avatar5, status: 'success' },
-      user: {
-        name: 'Agapetus Tadeáš',
-        new: true,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'Spain', flag: cifEs },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'primary',
-      },
-      payment: { name: 'Google Wallet', icon: cibCcApplePay },
-      activity: 'Last week',
-    },
-    {
-      avatar: { src: avatar6, status: 'danger' },
-      user: {
-        name: 'Friderik Dávid',
-        new: true,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'Poland', flag: cifPl },
-      usage: {
-        value: 43,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'success',
-      },
-      payment: { name: 'Amex', icon: cibCcAmex },
-      activity: 'Last week',
-    },
-  ]
+  const fetchBillData = async (page = 1) => {
+    try {
+      setLoading(true)
+      const response = await api.get(`/bills/accounts?status=pending&page=${page}`)
+
+      // Validate response structure
+      if (response?.data?.data) {
+        setBills(response.data.data.accounts || [])
+        setPagination(response.data.data.pagination || {})
+      } else {
+        setError('Invalid bill data format')
+        console.error('Invalid response format:', response)
+      }
+    } catch (err) {
+      console.error('Error fetching bill data:', err)
+      setError(err.response?.data?.message || 'Failed to load bill data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    console.log("Initializing dashboard...");
+    fetchDashboardData().then(() => console.log("Dashboard data loaded"));
+  }, []);
+
+  useEffect(() => {
+    fetchBillData(currentPage)
+  }, [currentPage])
+
+  if (loading) {
+    return <SpinnerOverlay isLoading={loading} />
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-danger text-center" role="alert">
+        {error}
+      </div>
+    )
+  }
+
+  // Destructure data safely
+  const {
+    average_bill_amount = {},
+    current_due_bills = {},
+    overdue_bills = {},
+    paid_bills = {},
+    totalCategories = 'N/A',
+    totalUsers = 'N/A',
+    totalVendors = 'N/A',
+  } = dashboardData
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
+  const handleBillDelete = (billId) => {
+    setSelectedBillId(billId)
+    setShowModal(true)
+  }
+
+  const handleBillDeleteConfirm = async () => {
+    if (!selectedBillId) return
+
+    try {
+      await api.delete(`/bills/accounts/${selectedBillId}`)
+      toast.success('Bill deleted successfully!')
+      setTimeout(() => {
+        fetchBillData(currentPage)
+      }, 3000)
+    } catch (error) {
+      console.error('Error deleting bill:', error)
+      toast.error('Failed to delete bill!')
+    } finally {
+      setShowModal(false)
+      setSelectedBillId(null)
+    }
+  }
 
   return (
-    <>
-      <WidgetsDropdown className="mb-4" />
-      <CCard className="mb-4">
-        <CCardBody>
-          <CRow>
-            <CCol sm={5}>
-              <h4 id="traffic" className="card-title mb-0">
-                Traffic
-              </h4>
-              <div className="small text-body-secondary">January - July 2023</div>
-            </CCol>
-            <CCol sm={7} className="d-none d-md-block">
-              <CButton color="primary" className="float-end">
-                <CIcon icon={cilCloudDownload} />
-              </CButton>
-              <CButtonGroup className="float-end me-3">
-                {['Day', 'Month', 'Year'].map((value) => (
-                  <CButton
-                    color="outline-secondary"
-                    key={value}
-                    className="mx-0"
-                    active={value === 'Month'}
-                  >
-                    {value}
-                  </CButton>
-                ))}
-              </CButtonGroup>
-            </CCol>
-          </CRow>
-          <MainChart />
-        </CCardBody>
-        <CCardFooter>
-          <CRow
-            xs={{ cols: 1, gutter: 4 }}
-            sm={{ cols: 2 }}
-            lg={{ cols: 4 }}
-            xl={{ cols: 5 }}
-            className="mb-2 text-center"
-          >
-            {progressExample.map((item, index, items) => (
-              <CCol
-                className={classNames({
-                  'd-none d-xl-block': index + 1 === items.length,
-                })}
-                key={index}
-              >
-                <div className="text-body-secondary">{item.title}</div>
-                <div className="fw-semibold text-truncate">
-                  {item.value} ({item.percent}%)
-                </div>
-                <CProgress thin className="mt-2" color={item.color} value={item.percent} />
-              </CCol>
-            ))}
-          </CRow>
-        </CCardFooter>
-      </CCard>
-      <WidgetsBrand className="mb-4" withCharts />
-      <CRow>
-        <CCol xs>
-          <CCard className="mb-4">
-            <CCardHeader>Traffic {' & '} Sales</CCardHeader>
-            <CCardBody>
-              <CRow>
-                <CCol xs={12} md={6} xl={6}>
-                  <CRow>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-info py-1 px-3">
-                        <div className="text-body-secondary text-truncate small">New Clients</div>
-                        <div className="fs-5 fw-semibold">9,123</div>
-                      </div>
-                    </CCol>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
-                        <div className="text-body-secondary text-truncate small">
-                          Recurring Clients
-                        </div>
-                        <div className="fs-5 fw-semibold">22,643</div>
-                      </div>
-                    </CCol>
-                  </CRow>
-                  <hr className="mt-0" />
-                  {progressGroupExample1.map((item, index) => (
-                    <div className="progress-group mb-4" key={index}>
-                      <div className="progress-group-prepend">
-                        <span className="text-body-secondary small">{item.title}</span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <CProgress thin color="info" value={item.value1} />
-                        <CProgress thin color="danger" value={item.value2} />
-                      </div>
-                    </div>
-                  ))}
-                </CCol>
-                <CCol xs={12} md={6} xl={6}>
-                  <CRow>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
-                        <div className="text-body-secondary text-truncate small">Pageviews</div>
-                        <div className="fs-5 fw-semibold">78,623</div>
-                      </div>
-                    </CCol>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-success py-1 px-3 mb-3">
-                        <div className="text-body-secondary text-truncate small">Organic</div>
-                        <div className="fs-5 fw-semibold">49,123</div>
-                      </div>
-                    </CCol>
-                  </CRow>
+    <div className="container mt-5">
+      {/* Message Banner */}
+      <div
+        className="alert alert-info text-center py-3 rounded"
+        style={{ backgroundColor: '#e3f2fd', color: '#0d47a1' }}
+      >
+        <strong>{'Welcome to the dashboard!'}</strong>
+      </div>
 
-                  <hr className="mt-0" />
+      {/* Dashboard Cards */}
+      <div className="row g-4">
+        {/* Existing Cards */}
+        <DashboardCard
+          title="Average Bill (This Month)"
+          value={
+            <span className="dark-mode-black">
+              {average_bill_amount.this_month?.toFixed(2) || 'N/A'}
+            </span>
+          }
+          color="#e7f3ff"
+          textColor="#1565c0"
+          icon="fas fa-calendar-alt"
+        />
+        <DashboardCard
+          title="Average Bill (This Year)"
+          value={
+            <span className="dark-mode-black">
+              {average_bill_amount.this_year?.toFixed(2) || 'N/A'}
+            </span>
+          }
+          color="#e7f3ff"
+          textColor="#1565c0"
+          icon="fas fa-calendar-check"
+        />
+        <DashboardCard
+          title="Average Bill (Overall)"
+          value={
+            <span className="dark-mode-black">
+              {average_bill_amount.overall?.toFixed(2) || 'N/A'}
+            </span>
+          }
+          color="#e7f3ff"
+          textColor="#1565c0"
+          icon="fas fa-chart-line"
+        />
+        <DashboardCard
+          title="Current Due Bills (Count)"
+          value={<span className="dark-mode-black">{current_due_bills.total_count || 0}</span>}
+          color="#fff7e6"
+          textColor="#f57f17"
+          icon="fas fa-file-invoice"
+        />
+        <DashboardCard
+          title="Current Due Bills (Amount)"
+          value={
+            <span className="dark-mode-black">
+              {current_due_bills.total_amount?.toFixed(2) || 'N/A'}
+            </span>
+          }
+          color="#fff7e6"
+          textColor="#f57f17"
+          icon="fas fa-dollar-sign"
+        />
+        <DashboardCard
+          title="Overdue Bills (Count)"
+          value={<span className="dark-mode-black">{overdue_bills.total_count || 0}</span>}
+          color="#ffe5e5"
+          textColor="#b71c1c"
+          icon="fas fa-exclamation-circle"
+        />
+        <DashboardCard
+          title="Overdue Bills (Amount)"
+          value={
+            <span className="dark-mode-black">
+              {overdue_bills.total_amount?.toFixed(2) || 'N/A'}
+            </span>
+          }
+          color="#ffe5e5"
+          textColor="#b71c1c"
+          icon="fas fa-dollar-sign"
+        />
+        <DashboardCard
+          title="Paid Bills (This Month)"
+          value={
+            <span className="dark-mode-black">
+              {paid_bills.this_month?.total_amount?.toFixed(2) || 'N/A'}
+            </span>
+          }
+          color="#e8f7e8"
+          textColor="#2e7d32"
+          icon="fas fa-check-circle"
+        />
+        <DashboardCard
+          title="Paid Bills (This Year)"
+          value={
+            <span className="dark-mode-black">
+              {paid_bills.this_year?.total_amount?.toFixed(2) || 'N/A'}
+            </span>
+          }
+          color="#e8f7e8"
+          textColor="#2e7d32"
+          icon="fas fa-calendar-check"
+        />
 
-                  {progressGroupExample2.map((item, index) => (
-                    <div className="progress-group mb-4" key={index}>
-                      <div className="progress-group-header">
-                        <CIcon className="me-2" icon={item.icon} size="lg" />
-                        <span>{item.title}</span>
-                        <span className="ms-auto fw-semibold">{item.value}%</span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <CProgress thin color="warning" value={item.value} />
-                      </div>
-                    </div>
-                  ))}
+        {/* New Cards */}
+        <DashboardCard
+          title="Total Categories"
+          value={<span className="dark-mode-black">{totalCategories}</span>}
+          color="#f0f4ff" // Light blue
+          textColor="#1a237e" // Dark blue
+          icon="fas fa-layer-group"
+        />
+        <DashboardCard
+          title="Total Users"
+          value={<span className="dark-mode-black">{totalUsers}</span>}
+          color="#fff3e0" // Light orange
+          textColor="#e65100" // Dark orange
+          icon="fas fa-users"
+        />
+        <DashboardCard
+          title="Total Service Providors"
+          value={<span className="dark-mode-black">{totalVendors}</span>}
+          color="#fce4ec" // Light pink
+          textColor="#880e4f" // Dark pink
+          icon="fas fa-store"
+        />
+      </div>
 
-                  <div className="mb-5"></div>
+      {/* Bills Table */}
+      <div className="card shadow-sm mt-5 card-dark-mode">
+        <div className="card-header bg-primary text-white">
+          <h4 className="mb-0">Bills Overview</h4>
+        </div>
+        <CTable bordered>
+          <CTableHead>
+            <CTableRow>
+              <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Name</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Provider Name</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Provider Email</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Provider Website</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+            </CTableRow>
+          </CTableHead>
+          <CTableBody>
+            {bills && bills.length > 0 ? (
+              bills.map((bill, index) => (
+                <CTableRow key={bill._id}>
+                  <CTableHeaderCell scope="row">
+                    {pagination.limit * (currentPage - 1) + index + 1}
+                  </CTableHeaderCell>
+                  <CTableDataCell>
+                    {bill.first_name_on_bill + ' ' + bill.last_name_on_bill}
+                  </CTableDataCell>
+                  <CTableDataCell>{bill.account_number ?? ''}</CTableDataCell>
+                  <CTableDataCell>{bill.service_provider_info.provider_name ?? ''}</CTableDataCell>
+                  <CTableDataCell>{bill.service_provider_info.email ?? ''}</CTableDataCell>
+                  <CTableDataCell>{bill.service_provider_info.website ?? ''}</CTableDataCell>
+                  <CTableDataCell>
+                    <span
+                      className={`badge ${
+                        bill.status === 'pending'
+                          ? 'bg-warning'
+                          : bill.status === 'approved'
+                            ? 'bg-success'
+                            : 'bg-secondary'
+                      }`}
+                    >
+                      {bill.status}
+                    </span>
+                  </CTableDataCell>
+                  <CTableDataCell>
+                    <a href={`/#/edit-bill/${bill._id}`} className="btn btn-primary btn-sm me-2">
+                      Edit
+                    </a>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleBillDelete(bill._id)}
+                    >
+                      Delete
+                    </button>
+                  </CTableDataCell>
+                </CTableRow>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center text-muted">
+                  No bills available.
+                </td>
+              </tr>
+            )}
+          </CTableBody>
+        </CTable>
+        <div className="card-footer text-end">
+          <Pagination
+            totalPages={pagination.totalPages || 1}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      </div>
 
-                  {progressGroupExample3.map((item, index) => (
-                    <div className="progress-group" key={index}>
-                      <div className="progress-group-header">
-                        <CIcon className="me-2" icon={item.icon} size="lg" />
-                        <span>{item.title}</span>
-                        <span className="ms-auto fw-semibold">
-                          {item.value}{' '}
-                          <span className="text-body-secondary small">({item.percent}%)</span>
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <CProgress thin color="success" value={item.percent} />
-                      </div>
-                    </div>
-                  ))}
-                </CCol>
-              </CRow>
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        onConfirm={handleBillDeleteConfirm}
+        message="Do you really want to delete this bill?"
+      />
 
-              <br />
-
-              <CTable align="middle" className="mb-0 border" hover responsive>
-                <CTableHead className="text-nowrap">
-                  <CTableRow>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
-                      <CIcon icon={cilPeople} />
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">User</CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
-                      Country
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">Usage</CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
-                      Payment Method
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">Activity</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {tableExample.map((item, index) => (
-                    <CTableRow v-for="item in tableItems" key={index}>
-                      <CTableDataCell className="text-center">
-                        <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div>{item.user.name}</div>
-                        <div className="small text-body-secondary text-nowrap">
-                          <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
-                          {item.user.registered}
-                        </div>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.country.flag} title={item.country.name} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="d-flex justify-content-between text-nowrap">
-                          <div className="fw-semibold">{item.usage.value}%</div>
-                          <div className="ms-3">
-                            <small className="text-body-secondary">{item.usage.period}</small>
-                          </div>
-                        </div>
-                        <CProgress thin color={item.usage.color} value={item.usage.value} />
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.payment.icon} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="small text-body-secondary text-nowrap">Last login</div>
-                        <div className="fw-semibold text-nowrap">{item.activity}</div>
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-    </>
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </div>
   )
 }
+
+// Reusable Card Component
+const DashboardCard = ({ title, value, color, textColor, icon }) => (
+  <div className="col-md-4">
+    <div
+      className="card border-0 shadow-sm h-100"
+      style={{
+        background: `linear-gradient(135deg, ${color}, #ffffff)`,
+        borderRadius: '12px',
+      }}
+    >
+      <div className="card-body d-flex align-items-center">
+        <div className="me-3">
+          <i className={`${icon} fa-2x`} style={{ color: textColor }}></i>
+        </div>
+        <div>
+          <h6 className="fw-bold" style={{ color: textColor }}>
+            {title}
+          </h6>
+          <h4 className="mb-0">{value}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+)
 
 export default Dashboard

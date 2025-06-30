@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+
+import React, { useEffect, useState, useRef } from "react";
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -13,6 +14,8 @@ import {
   CNavLink,
   CNavItem,
   useColorModes,
+  CAvatar,
+
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
@@ -27,8 +30,30 @@ import {
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
+import userIcon from './../assets/images/avatars/user.png'
+
 
 const AppHeader = () => {
+  // navigate("/#/login");
+
+
+  // Need to apply login condition
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Local storage se token check karain
+    const token = localStorage.getItem("authToken");
+    console.log(token)
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+  // const isLoggedIn = false;
+
+
   const headerRef = useRef()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
 
@@ -40,7 +65,14 @@ const AppHeader = () => {
       headerRef.current &&
         headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0)
     })
-  }, [])
+  }, []);
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    setIsLoggedIn(false);
+    window.location.reload();
+  };
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
@@ -57,12 +89,12 @@ const AppHeader = () => {
               Dashboard
             </CNavLink>
           </CNavItem>
-          <CNavItem>
+          {/* <CNavItem>
             <CNavLink href="#">Users</CNavLink>
           </CNavItem>
           <CNavItem>
             <CNavLink href="#">Settings</CNavLink>
-          </CNavItem>
+          </CNavItem> */}
         </CHeaderNav>
         <CHeaderNav className="ms-auto">
           <CNavItem>
@@ -81,7 +113,7 @@ const AppHeader = () => {
             </CNavLink>
           </CNavItem>
         </CHeaderNav>
-        <CHeaderNav>
+        {/* <CHeaderNav>
           <li className="nav-item py-1">
             <div className="vr h-100 mx-2 text-body text-opacity-75"></div>
           </li>
@@ -125,16 +157,37 @@ const AppHeader = () => {
               </CDropdownItem>
             </CDropdownMenu>
           </CDropdown>
-          <li className="nav-item py-1">
-            <div className="vr h-100 mx-2 text-body text-opacity-75"></div>
-          </li>
-          <AppHeaderDropdown />
+         
+        </CHeaderNav> */}
+        <CHeaderNav>
+          {isLoggedIn ? (
+            // <AppHeaderDropdown />
+            <>
+              {/* <AppHeaderDropdown /> */}
+                      <CAvatar src={userIcon} size="md" />
+              
+              <li className="nav-item py-1">
+                <CNavItem>
+                  <CNavLink href="#" onClick={handleLogout}>
+                    Logout
+                  </CNavLink>
+                </CNavItem>
+              </li>
+            </>
+          ) : (
+            <li className="nav-item py-1">
+              <CNavItem>
+                <CNavLink href="/#/login">Login</CNavLink>
+              </CNavItem>
+            </li>
+          )}
         </CHeaderNav>
       </CContainer>
       <CContainer className="px-4" fluid>
         <AppBreadcrumb />
       </CContainer>
     </CHeader>
+    
   )
 }
 
